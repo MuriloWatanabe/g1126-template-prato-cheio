@@ -7,9 +7,9 @@ Conecta doadores de alimentos excedentes a ONGs, antes que a comida se perca.
 > walking skeleton (U1) → incremento guiado pelo projeto (U2) → produto refatorado (U3).
 
 ## Integrantes
-- Nome — @usuario-github
-- Nome — @usuario-github
-- Nome — @usuario-github
+- Nome — Gabriel Albani de Souza
+- Nome — Miguel Augusto Guedes
+- Nome — Murilo Enzo Watanabe
 
 ## Como rodar
 
