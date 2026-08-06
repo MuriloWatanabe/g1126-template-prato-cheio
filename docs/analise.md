@@ -7,8 +7,8 @@
 ## Incertezas
 
 ## Stakeholders
-| Stakeholder | Interesse | Influência | O que espera |
-|---|---|---|---|
+| Stakeholder | Interesse | Influência | O que espera | Consequência para a iteração 1 |
+|---|---|---|---|---|
 
 ## Objetivos de impacto
 1.
@@ -16,6 +16,14 @@
 3.
 
 ## Regras de negócio
+
+## Conflitos de prioridade
+**Conflito 1**
+- **As duas partes e o que cada uma quer** (na voz dela):
+- **O eixo** — a variável em que uma ganha na medida em que a outra perde:
+- **O que cada lado perde na decisão:**
+- **Critério que decide** (aplicável por outra pessoa, sem consultar o grupo):
+- **Saída adotada:** decidir · adiar com data e o que medir · anular o eixo
 
 ## Histórias de usuário
 | # | História (Como… quero… para…) | INVEST: o que falha |
