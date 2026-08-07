@@ -28,12 +28,12 @@ export async function listarDisponiveis() {
 }
 
 // TODO: buscar uma doação pelo id (devolver undefined se não existir).
-export async function buscarPorId(id) {
+export async function buscarPorId(_id) {
   throw new Error('não implementado: repositorio.buscarPorId');
 }
 
 // TODO: marcar a doação como aceita pela ONG e devolver a linha atualizada.
 // Pense: como garantir que duas ONGs não aceitem a mesma doação?
-export async function aceitar(id, ong) {
+export async function aceitar(_id, _ong) {
   throw new Error('não implementado: repositorio.aceitar');
 }

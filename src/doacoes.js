@@ -23,6 +23,6 @@ export async function listarDisponiveis() {
 
 // História zero — "uma ONG aceita uma doação".
 // Regra do caso: uma doação aceita não fica disponível para outra ONG.
-export async function aceitar(id, ong) {
+export async function aceitar(_id, _ong) {
   throw new Error('não implementado: aceitar');
 }
