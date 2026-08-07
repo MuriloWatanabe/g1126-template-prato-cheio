@@ -6,10 +6,74 @@ Conecta doadores de alimentos excedentes a ONGs, antes que a comida se perca.
 > Este repositório é a base do produto que evolui nas três unidades:
 > walking skeleton (U1) → incremento guiado pelo projeto (U2) → produto refatorado (U3).
 
-## Integrantes
-- Nome — Gabriel Albani de Souza
-- Nome — Miguel Augusto Guedes
-- Nome — Murilo Enzo Watanabe
+## Trabalho em sala — análise do pedido
+
+Grupo: Gabriel Albani de Souza · Miguel Augusto Guedes · Guilherme Tamanini · Vinicius Henrique da Silva · Murilo Enzo Watanabe 
+
+### 1. Reescrita do pedido do cliente
+
+**Pedido como chegou (mal formulado):**
+
+> "Queremos um aplicativo com mapa mostrando os restaurantes que estão com comida
+> sobrando, notificação push para as ONGs mais próximas, um chat entre a ONG e o
+> doador e login com Google. Também precisa de um painel com gráficos de quantos
+> quilos foram salvos."
+
+**Separando o que é problema do que já é solução:**
+
+| Trecho do pedido | Problema real por trás | Solução embutida (decisão prematura) |
+| --- | --- | --- |
+| "mapa mostrando os restaurantes" | A ONG precisa descobrir que existe um excedente disponível e se consegue chegar até ele | Mapa/geolocalização |
+| "notificação push" | O alimento tem janela curta: o aviso precisa chegar a tempo | Push nativo |
+| "chat entre ONG e doador" | Faltam informações para combinar a retirada (horário, quantidade, condições) | Chat em tempo real |
+| "login com Google" | É preciso saber quem publicou e quem aceitou, e confiar nisso | Provedor de identidade específico |
+| "painel com gráficos" | Alguém precisa comprovar o impacto da operação | Dashboard com gráficos |
+
+**Pedido reescrito (problema, sem solução dentro):**
+
+> Estabelecimentos que produzem alimento excedente hoje descartam parte dele porque
+> não conseguem, dentro da janela em que a comida ainda é segura, avisar uma ONG
+> capaz de retirá-la. Do outro lado, as ONGs não sabem o que está disponível agora.
+> Precisamos que um excedente publicado por um doador seja visto por ONGs aptas e
+> assumido por **uma** delas de forma inequívoca, para que o alimento chegue a quem
+> precisa antes de perder a validade e ninguém desloque equipe à toa.
+
+Nada acima diz *como* isso é feito — mapa, push e chat voltam à mesa depois, como
+alternativas avaliadas, não como requisito.
+
+### 2. Cinco incertezas a resolver antes de projetar
+
+| # | Incerteza | Por que bloqueia o projeto | Como resolver |
+| --- | --- | --- | --- |
+| 1 | Qual é a janela de tempo real entre publicar e retirar (minutos, horas, um dia)? | Define se a doação precisa expirar sozinha, se o aviso precisa ser ativo e qual atraso é aceitável | Entrevistar dois doadores e duas ONGs; medir casos reais recentes |
+| 2 | Quem faz o transporte — a ONG busca ou o doador entrega? | Muda completamente o fluxo e quem é o usuário principal do sistema | Confirmar com as ONGs se elas têm veículo e equipe disponíveis |
+| 3 | O que acontece quando a ONG aceita e não retira? | Determina se basta remover a doação da lista ou se é preciso devolvê-la ao ar, com prazo e histórico | Levantar a frequência desse cenário com as ONGs; definir regra com o cliente |
+| 4 | Qual é a informação mínima que torna uma doação confiável (tipo, quantidade, validade, refrigeração, endereço)? | Sem isso a ONG não decide se vale o deslocamento, e o cadastro pode nascer errado | Coletar exemplos reais de doações já feitas e checar exigências sanitárias |
+| 5 | Qualquer um pode se cadastrar como ONG, ou existe validação? | Define se há um processo de aprovação, papéis distintos e responsável por ele | Perguntar ao cliente quem responde por essa curadoria hoje |
+
+### 3. Três restrições e o que cada uma elimina
+
+**Prazo — walking skeleton ponta a ponta ao fim da Unidade 1.**
+Só cabe a história zero: doador publica → ONG vê → ONG aceita e a doação sai da
+lista. Isso elimina mapa, chat, notificação e painel do escopo atual: qualquer um
+deles consome o tempo que o caminho completo exige para existir funcionando. As
+soluções possíveis ficam restritas às que atravessam o sistema inteiro em poucos
+passos, mesmo que feias.
+
+**Técnica — Node 22 com SQLite embutido, testes por um comando e CI verde.**
+Não há serviço externo, fila nem infraestrutura paga na Unidade 1, então push
+nativo, geolocalização e chat em tempo real estão fora por dependerem de terceiros.
+A troca para PostgreSQL na Unidade 3 obriga o acesso a dados a ficar contido em
+`src/db.js` (`query()` devolvendo `{ rows }`): as regras de negócio não podem ter
+SQL espalhado, o que descarta soluções que acoplem consulta e regra.
+
+**Negócio — alimento perecível, doação fisicamente única e sem verba.**
+Como o mesmo lote não pode ser retirado por duas ONGs, "aceitar" precisa ser
+exclusivo e imediato: soluções em que a doação continua visível após o aceite estão
+descartadas. A responsabilidade sanitária exige registrar validade e condição de
+armazenamento, e a ausência de orçamento (ONGs e projeto acadêmico) elimina
+qualquer alternativa com custo mensal de infraestrutura.
+
 
 ## Como rodar
 
