@@ -6,14 +6,25 @@
 //   const { rows } = await query('SELECT * FROM doacoes WHERE id = ?', [id]);
 import { query } from './db.js';
 
-// TODO: inserir a doação e devolver a linha criada (dica: INSERT ... RETURNING *).
 export async function inserir({ tipo, quantidade, validade }) {
-  throw new Error('não implementado: repositorio.inserir');
+  const sql = `
+    INSERT INTO doacoes (tipo, quantidade, validade)
+    VALUES (?, ?, ?)
+    RETURNING *
+  `;
+  const { rows } = await query(sql, [tipo, quantidade, validade]);
+  return rows[0];
 }
 
-// TODO: devolver apenas as doações com status 'disponivel'.
 export async function listarDisponiveis() {
-  throw new Error('não implementado: repositorio.listarDisponiveis');
+  const sql = `
+    SELECT *
+    FROM doacoes
+    WHERE status = 'disponivel'
+    ORDER BY criada_em DESC, id DESC
+  `;
+  const { rows } = await query(sql);
+  return rows;
 }
 
 // TODO: buscar uma doação pelo id (devolver undefined se não existir).

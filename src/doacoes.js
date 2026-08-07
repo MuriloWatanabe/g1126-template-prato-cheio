@@ -5,12 +5,20 @@ import * as repo from './repositorio.js';
 // História zero — "um doador publica uma doação".
 // Critério: tipo, quantidade e validade são obrigatórios.
 export async function criarDoacao({ tipo, quantidade, validade }) {
-  throw new Error('não implementado: criarDoacao');
+  const t = typeof tipo === 'string' ? tipo.trim() : '';
+  const q = typeof quantidade === 'string' ? quantidade.trim() : '';
+  const v = typeof validade === 'string' ? validade.trim() : '';
+
+  if (!t || !q || !v) {
+    throw new Error('tipo, quantidade e validade são obrigatórios');
+  }
+
+  return await repo.inserir({ tipo: t, quantidade: q, validade: v });
 }
 
 // História zero — "uma ONG vê as doações disponíveis".
 export async function listarDisponiveis() {
-  throw new Error('não implementado: listarDisponiveis');
+  return await repo.listarDisponiveis();
 }
 
 // História zero — "uma ONG aceita uma doação".
