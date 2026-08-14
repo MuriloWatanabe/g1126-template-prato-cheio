@@ -162,26 +162,3 @@ Registro do Trabalho 3 — geração de histórias candidatas por IA (nível "IA
 
 **#7** — ao sugerir como fatiar a gigante, a IA propôs cortar "primeiro o filtro no backend, depois a tela do filtro" — fatiamento horizontal por camada técnica, do tipo que a Aula 3 marca como falso fatiamento (nada executa sozinho até as duas partes existirem). O grupo refatiou pelo método hambúrguer (camada × mínimo/bom), garantindo que cada fatia fosse demonstrável e descartável isoladamente.
 
-
-## Histórias de usuário
-
-| Papel | Quero | Para | INVEST → ação (a 4ª coluna) |
-|---|---|---|---|
-| ONG receptora | reservar uma doação disponível e que ela saia da listagem das outras ONGs | que uma refeição não se perca porque duas ONGs mandaram voluntário atrás do mesmo item | **Independente** — não roda sem publicar/listar já existirem. Mantida assim de propósito: exercita a regra central RN-02 (aceita → sai da lista), que é o maior risco do sistema. |
-| Doador (restaurante/padaria/mercado) | publicar uma doação informando tipo, quantidade e validade | não jogar no lixo a sobra boa do fim do expediente (obj. 2 — aproveitamento) | **Negociável** — a candidata da IA já vinha com lista suspensa, campo numérico, datepicker e botão azul (decidiu o widget de cada campo). Ação: os widgets foram para o critério de aceite; a história ficou só com os 3 campos da RN-01. |
-| ~~Time~~ (não é stakeholder) | ~~criar a tabela de doações no banco~~ | ~~armazenar os dados~~ | **Não é história — é tarefa.** "Time" não está no mapa de stakeholders e ninguém fora do time percebe quando termina. Ação: retirada da tabela de valor e registrada como tarefa técnica de implementação. |
-| Voluntário entregador | confirmar a coleta pelo celular, na rua, mesmo com o sinal oscilando | não perder a corrida nem gravar o horário errado quando a conexão cai (obj. 1) | **Testável** — a candidata dizia "app rápido e fácil de usar" (adjetivo, não verificável). Ação: reescrita como estímulo/ambiente/resposta/medida — "em 3G a ~400 kbps, a confirmação responde em até 2 s e grava o horário do evento, não o da sincronização". |
-| Poder público municipal | um relatório de cobertura das doações por bairro | justificar o apoio público e a verba com dado real de onde a comida chega (obj. 3) | **Estimável** — a candidata assumia, sem dizer, que o endereço já guarda o bairro estruturado; ninguém sabia se existe. Ação: trocamos "escrever o relatório" por um **spike de 2 h** para checar se dá para extrair o bairro do endereço cadastrado. Quem ratifica se vale estruturar o campo é a Marta. |
-| ONG receptora ★ | ver a lista de disponíveis e aceitar uma doação por 1 toque, gravando o horário do aceite | operar de ponta a ponta e passar a medir o tempo entre publicação e coleta (obj. 1) desde o 1º dia | **Fatia 1 / história zero.** Linha dos mínimos do hambúrguer (lista em ordem de publicação · 1 toque · sai da lista · grava aceite). Atravessa interface→regra(RN-02)→dados e executa. Falha em Independente e é mantida: escolhida por **risco**, não por valor. |
-| ONG receptora | filtrar as disponíveis por tipo e ver a validade de cada uma | escolher a doação certa para quem atendo, em vez de aceitar a primeira e descobrir que não serve | **Fatia 2.** Camada "encontrar/decidir" no nível bom. Demonstrável e descartável sozinha (a lista filtra na tela). A IA sugeriu "primeiro o filtro no backend, depois a tela" — fatia horizontal; refatiamos por valor visível. |
-| ONG receptora | que minha reserva volte para a lista se eu não confirmar a coleta em 6 h | não travar indefinidamente uma doação que reservei e não vou buscar — libera para outra ONG (RN-03) | **Fatia 3.** Exercita a RN-03 (a regra que o grupo inventou). Demonstrável com relógio controlado (reservar → avançar o tempo → volta à lista). Descartável isolada. |
-
-**★ História zero — por quê e o que fica fora**
-
-Escolhida por risco, não por valor: é a fatia que atravessa interface → regra → dados e executa (esqueleto ambulante), exercita a regra de maior risco (RN-02: aceita → sai da lista) e produz a linha de base que falta — grava o horário da publicação e do aceite, alimentando o objetivo 1.
-
-Fica **FORA**, e o motivo é sempre risco ou medição, nunca "é difícil":
-- **Autenticação de doador e ONG** — não retira o risco do fluxo aceita→sai nem produz medição; é infra que entra depois sem mudar o esqueleto.
-- **Filtro por proximidade, notificação, foto** — são os níveis "bom/luxo" do hambúrguer (fatias 2 e 3); nenhum exercita regra nova nem move um número.
-- **Expiração automática da reserva (RN-03)** — é a fatia 3; entra no escopo total, não no esqueleto.
-- **Recusar publicação com campo faltando (RN-01)** — o caminho feliz já basta para provar a RN-02 e a medição; a validação é a próxima fatia e não retira esse risco.
