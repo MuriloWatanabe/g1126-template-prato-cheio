@@ -144,15 +144,22 @@ Em vez de escolher entre "poucos campos" e "muitos campos", o grupo atacou o cus
 | ONG receptora | filtrar as disponíveis por tipo e ver a validade de cada uma | escolher a doação certa para quem atendo, em vez de aceitar a primeira e descobrir que não serve | **Fatia 2.** Camada "encontrar/decidir" no nível bom. Demonstrável e descartável sozinha (a lista filtra na tela). A IA sugeriu "primeiro o filtro no backend, depois a tela" — fatia horizontal; refatiamos por valor visível. |
 | ONG receptora | que minha reserva volte para a lista se eu não confirmar a coleta em 6 h | não travar indefinidamente uma doação que reservei e não vou buscar — libera para outra ONG (RN-03) | **Fatia 3.** Exercita a RN-03 (a regra que o grupo inventou). Demonstrável com relógio controlado (reservar → avançar o tempo → volta à lista). Descartável isolada. |
 
-**★ História zero — por quê e o que fica fora**
 
-Escolhida por risco, não por valor: é a fatia que atravessa interface → regra → dados e executa (esqueleto ambulante), exercita a regra de maior risco (RN-02: aceita → sai da lista) e produz a linha de base que falta — grava o horário da publicação e do aceite, alimentando o objetivo 1.
+## ★ História zero - Por que ela
+Escolhemos esta fatia porque ela força cedo a regra de negócio central do sistema — uma doação aceita por uma ONG deixa de estar disponível para qualquer outra — enquanto grava o instante da publicação e do aceite para criar a linha de base de medição do tempo de coleta.
 
-Fica **FORA**, e o motivo é sempre risco ou medição, nunca "é difícil":
-- **Autenticação de doador e ONG** — não retira o risco do fluxo aceita→sai nem produz medição; é infra que entra depois sem mudar o esqueleto.
-- **Filtro por proximidade, notificação, foto** — são os níveis "bom/luxo" do hambúrguer (fatias 2 e 3); nenhum exercita regra nova nem move um número.
-- **Expiração automática da reserva (RN-03)** — é a fatia 3; entra no escopo total, não no esqueleto.
-- **Recusar publicação com campo faltando (RN-01)** — o caminho feliz já basta para provar a RN-02 e a medição; a validação é a próxima fatia e não retira esse risco.
+## O que ficou FORA da fatia e por quê
+Login e autenticação de usuários: Foi excluído para não interpor uma camada de identidade entre a ação e o dado medido, protegendo a pureza da linha de base do tempo entre publicação e aceite antes de introduzirmos sessões e permissões.
+
+Upload de fotos da comida: Foi excluído para isolar primeiro o risco arquitetural da concorrência de reservas; anexos pesados num canal 3G de 400 kbps introduziriam latência e falhas de rede que contaminariam a medição do instante real do aceite.
+
+Notificações push: Foi excluído para manter o fluxo observável e determinístico enquanto validamos a regra de exclusividade do aceite, evitando um canal assíncrono externo que mascararia se a doação saiu da lista pela regra ou pela entrega da notificação.
+
+Filtros e busca avançada por categoria, distância ou validade: Foi excluído para não abrir múltiplos caminhos de leitura sobre a lista de disponíveis antes de garantirmos que a transição "disponível → aceita" é atômica, reduzindo o risco de duas ONGs enxergarem a mesma doação como livre.
+
+Painel de histórico e relatórios da coordenadora: Foi excluído para primeiro assegurar que os carimbos de tempo de publicação e aceite estão sendo gravados de forma confiável, já que qualquer relatório construído sobre uma medição ainda não validada propagaria erro em vez de informação.
+
+Cadastro e gestão de perfis de doadores e ONGs: Foi excluído para concentrar o risco no núcleo transacional da reserva concorrente, evitando que a modelagem de entidades secundárias desloque o foco do dado crítico que sustenta toda a medição do projeto.
 
 ## Critérios de aceite
 **História X** — Dado … Quando … Então …
