@@ -132,8 +132,6 @@ Em vez de escolher entre "poucos campos" e "muitos campos", o grupo atacou o cus
 
 
 ## Histórias de usuário
-| # | História (Como… quero… para…) | INVEST: o que falha |
-|---|---|---|
 
 ## Critérios de aceite
 **História X** — Dado … Quando … Então …
@@ -151,4 +149,15 @@ Em vez de escolher entre "poucos campos" e "muitos campos", o grupo atacou o cus
 - **Riscos e limitações:**
 
 ## Uso de IA
-O que geramos com IA, o que verificamos e o que alteramos.
+
+Registro do Trabalho 3 — geração de histórias candidatas por IA (nível "IA como colaboradora") e a correção do grupo, história por história (ver tabela em [Histórias de usuário](#histórias-de-usuário)).
+
+**#2** — a IA gerou a história do doador já com lista suspensa, campo numérico, calendário e botão "Publicar" verde: decidiu sozinha o widget de cada campo em vez de deixar a história negociável. O grupo moveu esses detalhes para o critério de aceite e manteve na história só tipo/quantidade/validade (RN-01). Regra inventada: nenhuma regra de negócio nova — mas a versão da IA também não citava as restrições do caso "precisa funcionar no navegador do celular" e "orçamento próximo de zero"; se o time tivesse aceitado sem revisar, o critério de aceite nasceria sem elas.
+
+**#3** — a IA gerou "Como time, quero criar a tabela de doações no banco, para armazenar os dados" como se fosse história de usuário. "O time" não é stakeholder do mapa da Aula 2 — é tarefa técnica disfarçada. O grupo retirou a linha da tabela de valor e registrou como tarefa de implementação. Regra inventada: a IA criou um stakeholder implícito ("o time") que não existe entre os seis papéis do mapa; a decisão de manter isso fora da tabela é do grupo, não da IA.
+
+**#4** — a primeira versão da IA para o voluntário dizia "Como voluntário, quero um app rápido e fácil de usar, para trabalhar melhor": dois adjetivos (qualidade sem número) e um "para" fraco. O grupo reescreveu usando a restrição real do caso — conexão instável do voluntário na rua — como estímulo/ambiente/resposta/medida (3G a 400 kbps, resposta em até 2 s). Foi o erro mais caro da IA nesta rodada: a restrição de rede do caso tinha simplesmente desaparecido da versão gerada.
+
+**#5** — a IA gerou "Como poder público municipal, quero um relatório de impacto por bairro, para justificar apoio e divulgação" assumindo, sem dizer, que o cadastro de doador e de ONG já guarda um campo de bairro estruturado. Essa regra não existe no caso — é invenção da IA. O grupo não descartou a história (o interesse do poder público está no mapa de stakeholders), mas trocou a ação de "escrever" por "investigar": um spike de 2h para checar se dá para extrair bairro do endereço já cadastrado. Quem ratifica se vale a pena estruturar esse campo é a Marta, não o grupo nem a IA.
+
+**#7** — ao sugerir como fatiar a gigante, a IA propôs cortar "primeiro o filtro no backend, depois a tela do filtro" — fatiamento horizontal por camada técnica, do tipo que a Aula 3 marca como falso fatiamento (nada executa sozinho até as duas partes existirem). O grupo refatiou pelo método hambúrguer (camada × mínimo/bom), garantindo que cada fatia fosse demonstrável e descartável isoladamente.
