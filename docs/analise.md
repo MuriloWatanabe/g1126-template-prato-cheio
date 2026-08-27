@@ -270,8 +270,19 @@ no "Então" — nada que exija abrir o banco ou ler o código para verificar.
 - **Então** a tela recusa com "esta reserva expirou e a doação voltou para a lista" e a doação continua disponível para as demais ONGs.
 
 ## Riscos
+
+### Escala:
+
+- Baixa: Pouco provável/Pouco prejuízo no andamento do projeto
+
+- Média: Pode acontecer/Pode dificultar o andamento do projeto
+
+- Alta: Provável/Pode comprometer significatvimante o andamento do projeto
+
 | Risco | Probabilidade | Impacto | Mitigação |
 |---|---|---|---|
+| Atraso ou ausência de integrantes nas atividades do projeto | Média | Média | Até 30/08 Vinicius Henrique da Silva irá distribuir as tarefas de cada etapa para evitar dependência exclusiva em certos integrantes do grupo |
+| Dificuldade técnica com as stacks do projeto | Média | Alta | Até 30/08 Murilo Enzo Watanabe irá validar as configurações do projeto e documentar os passos necessários para auxiliar no desenvolvimento |
 
 ## Hipótese e experimento
 
