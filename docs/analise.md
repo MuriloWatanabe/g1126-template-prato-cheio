@@ -162,7 +162,112 @@ Painel de histórico e relatórios da coordenadora: Foi excluído para primeiro 
 Cadastro e gestão de perfis de doadores e ONGs: Foi excluído para concentrar o risco no núcleo transacional da reserva concorrente, evitando que a modelagem de entidades secundárias desloque o foco do dado crítico que sustenta toda a medição do projeto.
 
 ## Critérios de aceite
-**História X** — Dado … Quando … Então …
+
+Três histórias da tabela acima, com os critérios em Dado / Quando / Então. Cada critério
+descreve estado no "Dado", uma única ação no "Quando" e um resultado observável de fora
+no "Então" — nada que exija abrir o banco ou ler o código para verificar.
+
+---
+
+### ★ História zero — ONG receptora: ver as disponíveis e aceitar por 1 toque
+
+> Como ONG receptora, quero ver a lista de doações disponíveis e aceitar uma por 1 toque,
+> gravando o horário do aceite, para operar de ponta a ponta e medir o tempo entre
+> publicação e coleta desde o 1º dia.
+
+**CA-01 — A lista mostra o que está disponível, em ordem de publicação**
+- **Dado** que existem três doações publicadas e ainda não aceitas, publicadas às 18h00, 18h10 e 18h20
+- **Quando** a ONG abre a lista de doações disponíveis
+- **Então** a tela exibe as três, da mais antiga para a mais recente (18h00, 18h10, 18h20), cada uma com descrição, quantidade e validade.
+
+**CA-02 — Aceitar é um toque e a doação sai da lista de quem aceitou**
+- **Dado** que existe uma doação publicada e ainda não aceita, visível na lista da ONG A
+- **Quando** a ONG A toca uma única vez em "Aceitar" nessa doação
+- **Então** a tela confirma o aceite, exibe o horário do aceite (data e hora) e a doação deixa de aparecer na lista de disponíveis da ONG A.
+
+**CA-03 — A doação aceita desaparece da lista das demais ONGs (RN-02)**
+- **Dado** que existe uma doação já aceita pela ONG A
+- **Quando** a ONG B abre a lista de doações disponíveis
+- **Então** essa doação não aparece na lista da ONG B.
+
+**CA-04 — Caminho proibido: segunda ONG tentando aceitar a mesma doação (RN-02)**
+- **Dado** que existe uma doação já aceita pela ONG A e que a ONG B ainda tem a tela antiga aberta, com essa doação listada
+- **Quando** a ONG B toca em "Aceitar" nessa doação
+- **Então** a ONG B recebe a mensagem "esta doação já foi aceita por outra ONG", a doação some da tela da ONG B e o aceite da ONG A permanece inalterado, com o horário original.
+
+**CA-05 — Caminho proibido: duas ONGs aceitando ao mesmo tempo (RN-02)**
+- **Dado** que existe uma doação publicada e ainda não aceita, visível para a ONG A e para a ONG B
+- **Quando** as duas tocam em "Aceitar" no mesmo instante
+- **Então** exatamente uma recebe a confirmação de aceite com horário e a outra recebe a mensagem de doação já aceita; em nenhum caso as duas recebem confirmação.
+
+**CA-06 — Lista vazia**
+- **Dado** que não existe nenhuma doação publicada e não aceita
+- **Quando** a ONG abre a lista de doações disponíveis
+- **Então** a tela exibe "nenhuma doação disponível no momento" e nenhum item.
+
+---
+
+### História — Doador: publicar uma doação (RN-01)
+
+> Como doador, quero publicar uma doação informando tipo, quantidade e validade, para não
+> jogar no lixo a sobra boa do fim do expediente.
+
+**CA-07 — Publicação completa entra na listagem**
+- **Dado** que o doador está com o formulário de publicação preenchido com descrição "pão francês", quantidade 5 kg e validade amanhã às 12h00
+- **Quando** ele confirma a publicação
+- **Então** a tela exibe o código público da doação e a doação passa a aparecer na lista de disponíveis das ONGs, com essa descrição, quantidade e validade.
+
+**CA-08 — Caminho proibido: campo obrigatório vazio (RN-01)**
+- **Dado** que o doador está com o formulário preenchido, exceto pela quantidade, que está vazia
+- **Quando** ele confirma a publicação
+- **Então** a tela aponta a quantidade como obrigatória, mantém o restante preenchido, não exibe código público e a doação não aparece na lista das ONGs. *(o mesmo vale, um por vez, para descrição vazia e validade vazia)*
+
+**CA-09 — Caminho proibido: validade no passado (RN-01)**
+- **Dado** que o doador está com o formulário preenchido e a validade informada é ontem às 20h00
+- **Quando** ele confirma a publicação
+- **Então** a tela recusa com "a validade precisa ser posterior ao momento da publicação" e a doação não aparece na lista das ONGs.
+
+**CA-10 — Caminho proibido: quantidade zero ou sem unidade (RN-01)**
+- **Dado** que o doador está com o formulário preenchido e a quantidade informada é 0, ou está sem unidade de medida selecionada
+- **Quando** ele confirma a publicação
+- **Então** a tela recusa com "informe uma quantidade maior que zero e a unidade" e a doação não aparece na lista das ONGs.
+
+**CA-11 — Publicação recorrente a partir de item frequente**
+- **Dado** que o doador tem "pão francês (kg)" salvo em seus itens frequentes
+- **Quando** ele seleciona esse item, confirma a quantidade e confirma a validade pré-preenchida
+- **Então** a doação é publicada com os três campos preenchidos e aparece na lista das ONGs, sem que o formulário completo tenha sido exibido.
+
+---
+
+### História — ONG receptora: reserva não confirmada volta para a lista (RN-03)
+
+> Como ONG receptora, quero que minha reserva volte para a lista se eu não confirmar a
+> coleta em 6 h, para não travar indefinidamente uma doação que não vou buscar.
+
+**CA-12 — Dentro do prazo a reserva continua valendo**
+- **Dado** que existe uma doação reservada pela ONG A há 5 h 59 min, com coleta ainda não confirmada e validade só amanhã
+- **Quando** a ONG B abre a lista de doações disponíveis
+- **Então** a doação não aparece na lista da ONG B e segue marcada como reservada na tela da ONG A.
+
+**CA-13 — Passado o prazo, a doação volta para a lista**
+- **Dado** que existe uma doação reservada pela ONG A há 6 h 01 min, com coleta ainda não confirmada e validade só amanhã
+- **Quando** a ONG B abre a lista de doações disponíveis
+- **Então** a doação aparece na lista da ONG B como disponível, a tela da ONG A mostra a reserva como expirada e o doador e a ONG A recebem, cada um, um aviso de reserva expirada.
+
+**CA-14 — Caminho proibido: expirar depois da validade não devolve o item (RN-03)**
+- **Dado** que existe uma doação reservada pela ONG A há 6 h 01 min, com coleta não confirmada, e cuja validade já passou
+- **Quando** a ONG B abre a lista de doações disponíveis
+- **Então** a doação não aparece na lista da ONG B e é exibida como perdida na tela do doador.
+
+**CA-15 — Coleta confirmada a tempo não expira**
+- **Dado** que existe uma doação reservada pela ONG A com a coleta confirmada 4 h após a reserva
+- **Quando** se passam mais de 6 h desde a reserva
+- **Então** a doação continua marcada como coletada, não volta para a lista das ONGs e nenhum aviso de expiração é enviado.
+
+**CA-16 — Caminho proibido: confirmar coleta depois da expiração**
+- **Dado** que existe uma doação cuja reserva pela ONG A já expirou e que voltou para a lista de disponíveis
+- **Quando** a ONG A toca em "confirmar coleta"
+- **Então** a tela recusa com "esta reserva expirou e a doação voltou para a lista" e a doação continua disponível para as demais ONGs.
 
 ## Riscos
 | Risco | Probabilidade | Impacto | Mitigação |
