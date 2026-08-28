@@ -286,11 +286,18 @@ no "Então" — nada que exija abrir o banco ou ler o código para verificar.
 
 ## Hipótese e experimento
 
-## Decisão de análise
-- **Problema:**
-- **Alternativas:**
-- **Decisão e justificativa:**
-- **Riscos e limitações:**
+Decisão de análise
+
+Problema — Para a iteração 1 andar, faltava fechar qual seria a primeira fatia vertical (a história zero). O produto tem uma regra central de alto risco — RN-02, reserva exclusiva: doação aceita por uma ONG some para todas as outras — e, ao mesmo tempo, uma linha de base de medição a proteger (obj. 1, tempo entre publicação e aceite, medido desde o 1º dia). Não dava para começar por tudo; o corte da fatia definia o que ficava dentro e o que ficava fora da entrega, e sem esse corte a iteração não andava.
+
+Alternativas
+
+A — fatiar por valor / independência (INVEST). Começar pela história do doador publicando uma doação, a única candidata verdadeiramente Independente (roda sozinha, sem depender de outra história existir). Ganha: fatia limpa em INVEST, demonstrável e descartável isolada; já entrega algo de pé (dá para publicar). Perde: adia o maior risco do sistema — a concorrência de reservas (RN-02) só apareceria depois, quando corrigir custa caro.
+B — fatiar por risco. Começar pela história da ONG que vê a lista e aceita por 1 toque, atravessando interface → regra (RN-02) → dados, mesmo sabendo que ela falha em Independente (precisa de doações já publicadas para rodar). Ganha: força cedo a regra central e o maior risco arquitetural (aceite atômico e exclusivo) e grava desde já os carimbos de publicação/aceite que sustentam o obj. 1. Perde: viola a independência do INVEST — a fatia não roda sem um mínimo de publicar/listar antes; a primeira entrega não é um vertical único e limpo.
+
+Decisão e justificativa — Escolhemos a Alternativa B — fatiar por risco. O que decide é um risco desta mesma entrega: a RN-02 é a regra mais perigosa do sistema (único ponto de concorrência real; um erro nela põe duas ONGs indo buscar o mesmo lote — justamente o desperdício que o produto existe para evitar, obj. 2). Descobrir esse risco tarde, com a arquitetura já montada em volta, custaria muito mais do que aceitar uma fatia menos "limpa" agora. Soma-se o obj. 1: sem o aceite gravando horário desde o 1º dia, não há linha de base de tempo de coleta — e ela não é reconstituível depois. Por isso mantivemos a história zero mesmo falhando em Independente: aqui, risco pesa mais que pureza de fatiamento.
+
+Riscos e limitações — O custo é concreto. (1) A história zero não é Independente: para rodar ponta a ponta foi preciso admitir na fatia um mínimo de publicar+listar (senão não há o que aceitar), então a primeira entrega não é o vertical enxuto que o INVEST idealiza — é um núcleo transacional com o andaime mínimo em volta. (2) Ao concentrar o esforço no risco de concorrência, empurramos para depois o valor que o cliente enxerga rápido (filtro por tipo/validade, notificações, relatório da coordenadora): há o risco de a primeira demo parecer "pouca coisa visível" para quem espera funcionalidade, quando ela resolve o problema mais difícil. Assumimos esse desconforto de demo em troca de reduzir cedo o risco técnico caro.
 
 ## Uso de IA
 
