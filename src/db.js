@@ -44,6 +44,13 @@ export async function migrar() {
       criada_em   TEXT NOT NULL DEFAULT (datetime('now'))
     )
   `);
+
+  // A história zero grava o horário do aceite (CA-02). Adicionada aqui de forma
+  // idempotente para não quebrar bancos criados antes desta coluna existir.
+  const colunas = conexao().prepare('PRAGMA table_info(doacoes)').all();
+  if (!colunas.some((c) => c.name === 'aceita_em')) {
+    conexao().exec('ALTER TABLE doacoes ADD COLUMN aceita_em TEXT');
+  }
 }
 
 /** Apaga todos os dados. Usado pelos testes. */
