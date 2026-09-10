@@ -53,6 +53,22 @@ describe('publicar e listar doações', () => {
     expect(res.body[0].status).toBe('disponivel');
   });
 
+  // CA-01 — Dado três doações publicadas em sequência e não aceitas
+  //         Quando a ONG abre a lista
+  //         Então as três aparecem da mais antiga para a mais recente
+  it('lista as doações da mais antiga para a mais recente', async () => {
+    const primeira = await publicar({ tipo: 'Sopa', quantidade: '3 kg', validade: '2026-12-01' });
+    const segunda = await publicar({ tipo: 'Arroz', quantidade: '10 kg', validade: '2026-12-02' });
+    const terceira = await publicar({ tipo: 'Feijão', quantidade: '8 kg', validade: '2026-12-03' });
+
+    const res = await request(app).get('/api/doacoes');
+    expect(res.body.map((d) => d.id)).toEqual([
+      primeira.body.id,
+      segunda.body.id,
+      terceira.body.id
+    ]);
+  });
+
   // CA-08 (RN-01) — Dado um formulário com campo obrigatório vazio
   //                 Quando o doador confirma a publicação
   //                 Então a publicação é recusada e nada entra na lista

@@ -21,7 +21,7 @@ export async function listarDisponiveis() {
     SELECT *
     FROM doacoes
     WHERE status = 'disponivel'
-    ORDER BY criada_em DESC, id DESC
+    ORDER BY criada_em ASC, id ASC
   `;
   const { rows } = await query(sql);
   return rows;
