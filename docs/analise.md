@@ -115,7 +115,19 @@ Escala — **Baixa:** pouco provável / pouco prejuízo · **Média:** pode acon
 
 **Riscos assumidos.** O eixo não some na **primeira** publicação, que ainda paga o formulário completo — se o piloto mostrar abandono ali, a decisão volta à mesa e será resolvida a favor da vigilância, atacando o atrito por onboarding assistido, não por remoção de campo. A decisão também pressupõe que o atrito é a barreira real, o que só se sustenta se a hipótese da seção 9 for confirmada.
 
-## 11. Uso de IA
+## 11. Trade-off — Quantidade de campos obrigatórios na publicação
+
+| Critério | A — Poucos campos | B — Muitos campos | C — Três campos + itens frequentes |
+|---|---|---|---|
+| **Atrito para o doador** | Baixo: publicação rápida | Alto: formulário mais longo | Baixo nas publicações recorrentes |
+| **Rastreabilidade** | Baixa: pode faltar informação necessária | Alta: mais informações registradas | Alta para os dados essenciais |
+| **Tempo de publicação** | Menor | Maior | Menor após o cadastro inicial |
+| **Abandono do cadastro** | Tendência de ser menor | Tendência de ser maior | Reduzido nas publicações recorrentes |
+| **Complexidade para o usuário** | Baixa | Alta | Baixa depois do primeiro cadastro |
+| **Principal ganho** | Adesão e rapidez | Rastreabilidade | Equilíbrio entre adesão e rastreabilidade |
+| **Principal perda** | Rastreabilidade | Facilidade de uso e adesão | Exige implementação e uso correto dos itens frequentes |
+
+## 12. Uso de IA
 
 Nível *colaboradora*: a IA gerou candidatas, o grupo corrigiu e responde pelo resultado.
 
