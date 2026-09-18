@@ -115,7 +115,216 @@ Escala — **Baixa:** pouco provável / pouco prejuízo · **Média:** pode acon
 
 **Riscos assumidos.** O eixo não some na **primeira** publicação, que ainda paga o formulário completo — se o piloto mostrar abandono ali, a decisão volta à mesa e será resolvida a favor da vigilância, atacando o atrito por onboarding assistido, não por remoção de campo. A decisão também pressupõe que o atrito é a barreira real, o que só se sustenta se a hipótese da seção 9 for confirmada.
 
-## 11. Uso de IA
+## 11. Decisões de projeto (U2): reserva e banco
+
+# Atomicidade da reserva exclusiva (RN-02)
+## Contexto
+
+A RN-02 exige que uma doação `disponível` seja reservada por **exatamente uma** ONG e que a
+transição `disponível → reservada` seja **atômica**. Os critérios CA-04 e CA-05 tornam isso
+verificável: duas ONGs tentando aceitar a mesma doação (em sequência ou no mesmo instante)
+nunca podem ambas receber confirmação. A tabela de histórias nomeia essa concorrência como o
+**maior risco do sistema**.
+
+Restrições que pesam aqui:
+
+- U1 roda em **SQLite embutido** (`node:sqlite`); U3 migra para **PostgreSQL**. A solução não
+  pode depender de um mecanismo que exista só em um dos bancos.
+- O README exige que o acesso a dados fique contido em `src/db.js` / `src/repositorio.js` e que
+  as regras de negócio não tenham SQL espalhado.
+- Sem serviço externo, fila ou lock distribuído em U1.
+
+## Alternativas consideradas
+
+1. **UPDATE condicional (compare-and-set)** — a reserva é uma única instrução
+   `UPDATE doacoes SET status='reservada', ong=? WHERE id=? AND status='disponivel'`, e o
+   resultado é decidido pelo número de linhas afetadas (1 = ganhou; 0 = já estava reservada).
+   - **Prós:** atômica no nível da linha nos **dois** bancos, sem transação explícita; é uma só
+     instrução, então atravessa a migração SQLite→PostgreSQL sem reescrita; casa com o `db.js`
+     já pronto (basta `repositorio.js` propagar o `rowCount`).
+   - **Contras:** a regra de negócio depende de a camada de dados devolver o número de linhas
+     afetadas; exige um teste de concorrência para provar o comportamento sob corrida.
+
+2. **Transação com bloqueio explícito** — `BEGIN IMMEDIATE` no SQLite / `SELECT … FOR UPDATE`
+   no PostgreSQL: lê e trava a linha, confere o status e então atualiza dentro da transação.
+   - **Prós:** lê como "leio, checo, gravo"; encaixa naturalmente se a reserva vier a envolver
+     mais de uma tabela no futuro.
+   - **Contras:** o mecanismo **muda de banco para banco** (o SQLite não tem `FOR UPDATE` e trava
+     no nível do banco inteiro), justamente o tipo de acoplamento a dialeto que a migração de U3
+     quer evitar; mais superfície para erro em uma história que precisa ser simples.
+
+## Decisão
+
+Adotar a **Alternativa 1 — UPDATE condicional (compare-and-set)**. É a única que é atômica e
+**portável** entre SQLite e PostgreSQL com o mesmo código, o que ataca diretamente o risco
+central (RN-02) sem criar dívida na migração de U3. A propagação do número de linhas afetadas
+fica contida em `repositorio.js`; `doacoes.js` decide "aceite confirmado" vs. "já aceita por
+outra ONG" a partir desse retorno, sem ver SQL.
+
+## Consequências
+
+- **Positivas:** uma instrução resolve a exclusividade; comportamento idêntico nos dois bancos;
+  fácil de cobrir com um teste de concorrência (duas reservas simultâneas → 1 sucesso, 1 conflito).
+- **Negativas / o que abrimos mão:** perde-se a leitura "linear" de uma transação explícita; se no
+  futuro a reserva precisar tocar várias tabelas de forma atômica, será preciso envolver o
+  compare-and-set em uma transação.
+- **Riscos e o que fazer se der errado:** se o teste de concorrência mostrar dupla confirmação,
+  a causa provável é o `repositorio.js` não estar propagando o `rowCount` corretamente ou a
+  ausência de restrição no schema — mitigação: manter o `status` como fonte de verdade da
+  condição no `WHERE` e cobrir CA-04 e CA-05 no CI.
+
+## Rastreabilidade
+
+RN-02 (reserva exclusiva) e o risco de concorrência de reservas nomeado na análise. Critérios de
+aceite: CA-03, CA-04, CA-05.
+
+# Estratégia de expiração da reserva (RN-03)
+## Contexto
+
+A RN-03 foi **inventada pelo grupo**: uma reserva sem coleta confirmada em **6 h** volta a
+`disponível` (ou vira `perdida`, se a validade já passou) e **notifica** o doador e a ONG
+reservante. A regra diz *quando* expira, mas o caso não diz **como** a expiração acontece.
+
+Restrições e pistas dos critérios de aceite:
+
+- CA-12 e CA-13 estão redigidos como "**quando** a ONG B abre a lista" — ou seja, o efeito é
+  observado no momento da leitura.
+- CA-13 exige **notificar** doador e ONG no instante da expiração.
+- CA-15 exige que uma coleta confirmada a tempo **não** expire.
+- Os testes precisam de **relógio controlado** (avançar o tempo).
+- U1: sem fila nem serviço externo; qualquer agendamento tem de caber dentro do processo Node.
+
+## Alternativas consideradas
+
+1. **Varredura ativa (job periódico)** — um agendador dentro do próprio processo Node
+   (`setInterval`/cron interno) percorre periodicamente as reservas com mais de 6 h e as devolve
+   à lista, disparando as notificações.
+   - **Prós:** as notificações da CA-13 saem na hora certa mesmo que ninguém abra a lista; não
+     depende de serviço externo.
+   - **Contras:** introduz tempo assíncrono e uma janela entre "expirou" e "a varredura rodou";
+     exige relógio injetável e cuidado para o job não competir com a escrita das reservas.
+
+2. **Expiração preguiçosa (na leitura)** — a expiração é **calculada no momento de listar** as
+   disponíveis, que é exatamente como CA-12/CA-13 estão escritos. Uma reserva com mais de 6 h é
+   tratada como expirada ao montar a lista e seu estado é corrigido na hora.
+   - **Prós:** determinística e trivial de testar (basta inserir a reserva com timestamp no
+     passado); zero processo em segundo plano; totalmente portável entre os bancos.
+   - **Contras:** a **notificação** da CA-13 e a transição para `perdida` (CA-14) só ocorrem
+     quando alguém lê — sem leitura, a reserva fica "logicamente expirada" mas ninguém é avisado.
+
+## Decisão
+
+Adotar a **Alternativa 2 — expiração preguiçosa na leitura** como fonte de verdade do estado,
+por ser determinística, portável e alinhada à redação dos critérios de aceite. Para cobrir o
+único ponto que a opção preguiçosa não resolve sozinha — as **notificações** da CA-13 quando
+ninguém abre a lista — acrescenta-se uma **varredura mínima** cujo único papel é emitir os avisos
+de reservas já expiradas; ela **não** é a dona da transição de estado, apenas notifica o que a
+leitura já consideraria expirado. Assim o comportamento observável não depende do job, e o job
+não pode divergir do estado.
+
+Para os testes, o **relógio é injetado como dependência** (uma função `now()` passada às regras),
+de modo que os cenários de 5 h 59 / 6 h 01 (CA-12/CA-13) e o de coleta a tempo (CA-15) rodem sem
+espera real.
+
+## Consequências
+
+- **Positivas:** estado da reserva sempre correto na leitura, sem depender do agendador; testes
+  rápidos e determinísticos; nenhuma dependência externa em U1.
+- **Negativas / o que abrimos mão:** convivemos com duas responsabilidades (leitura decide estado,
+  varredura só notifica) e com um pequeno atraso possível entre expirar e notificar.
+- **Riscos e o que fazer se der errado:** se as notificações duplicarem (leitura + varredura
+  marcando a mesma reserva), marcar a reserva como "notificada" ao emitir o aviso e checar essa
+  marca antes de reenviar. Se o piloto mostrar que ninguém depende de notificação em tempo real,
+  a varredura pode ser removida sem afetar CA-12/CA-13.
+
+## Rastreabilidade
+
+RN-03 (expiração da reserva não coletada), inventada pelo grupo. Critérios de aceite:
+CA-12, CA-13, CA-14, CA-15, CA-16.
+
+# Fronteira de portabilidade do banco (SQLite → PostgreSQL)
+## Contexto
+
+O caso fixa **SQLite** em U1/U2 e **PostgreSQL** em U3, e trata a troca como decisão de projeto
+que precisa de ADR. O README impõe dois compromissos: o acesso a dados fica contido em
+`src/db.js` (`query()` devolvendo `{ rows }`) e **as regras de negócio não podem ter SQL
+espalhado**. A decisão aqui é **como isolar o dialeto** para que a migração em U3 seja uma
+refatoração provada pelos testes, e não uma reescrita.
+
+Restrições que pesam aqui:
+
+- U1 valoriza o **mínimo de dependências** (o banco é embutido; "nada além do Node").
+- A migração precisa ser demonstrável com os **mesmos testes** passando antes e depois.
+- Diferenças reais de dialeto entre SQLite e PostgreSQL: tipos de data/hora, `RETURNING`,
+  `upsert`/`ON CONFLICT`, autoincremento e booleanos.
+
+## Alternativas consideradas
+
+1. **SQL portável escrito à mão, contido em `repositorio.js`** — todo o SQL vive na camada de
+   repositório, sobre o `db.query()` já pronto, evitando deliberadamente construções específicas
+   de um banco.
+   - **Prós:** zero dependência nova; controle total sobre cada consulta; alinhado ao desenho já
+     entregue no `db.js`; peso adequado a um walking skeleton.
+   - **Contras:** a portabilidade depende da disciplina do grupo — é possível escrever sem querer
+     algo que só roda em um dos bancos; a migração exige revisar consulta por consulta.
+
+2. **Query builder (ex.: Knex)** — uma camada que gera o SQL por dialeto a partir de uma API única.
+   - **Prós:** a troca de banco em U3 vira quase configuração (`client: 'sqlite3' → 'pg'`), com
+     menos risco de dialeto; migrations padronizadas.
+   - **Contras:** dependência externa nova e curva de aprendizado, contra o "mínimo de dependências"
+     de U1; abstração a mais para um sistema que, hoje, tem pouquíssimas consultas.
+
+## Decisão
+
+Adotar a **Alternativa 1 — SQL portável escrito à mão, contido em `repositorio.js`**, para U1 e U2.
+O volume de consultas do walking skeleton é pequeno e conhecido, então o custo de manter o SQL
+portável na mão é baixo e o ganho de não introduzir dependência é real. Para blindar a
+portabilidade, adota-se um checklist de dialeto (datas em ISO-8601 texto/`timestamptz`, evitar
+`RETURNING` e `upsert` proprietários, ler o id inserido de forma neutra) e mantém-se **todo** SQL
+fora de `doacoes.js`.
+
+Esta decisão será **reavaliada no início de U3**: se a migração real revelar atrito de dialeto
+maior que o previsto, reabre-se a favor da Alternativa 2 para a etapa de construção.
+
+## Consequências
+
+- **Positivas:** nenhuma dependência nova em U1; a fronteira de portabilidade fica onde o README
+  já pediu; migração em U3 contida em `db.js` + `repositorio.js`.
+- **Negativas / o que abrimos mão:** a garantia de portabilidade é humana (checklist + revisão de
+  PR), não automática; a migração exige rodar a suíte inteira contra o PostgreSQL para provar
+  equivalência.
+- **Riscos e o que fazer se der errado:** se surgir uma consulta que não tem forma portável, isolá-la
+  atrás de um método do `repositorio.js` com duas implementações selecionadas por `db.js`, sem
+  vazar para a regra; se o atrito for sistêmico, executar a reavaliação e migrar para query builder.
+
+## Rastreabilidade
+
+Restrição técnica da análise (SQLite em U1 → PostgreSQL em U3; SQL contido, sem vazar para a regra)
+e o risco "dificuldade técnica com as stacks do projeto" registrado na tabela de riscos.
+
+## 12. Trade-off — Quantidade de campos obrigatórios na publicação
+
+| Critério | A — Poucos campos | B — Muitos campos | C — Três campos + itens frequentes |
+|---|---|---|---|
+| **Atrito para o doador** | Baixo: publicação rápida | Alto: formulário mais longo | Baixo nas publicações recorrentes |
+| **Rastreabilidade** | Baixa: pode faltar informação necessária | Alta: mais informações registradas | Alta para os dados essenciais |
+| **Tempo de publicação** | Menor | Maior | Menor após o cadastro inicial |
+| **Abandono do cadastro** | Tendência de ser menor | Tendência de ser maior | Reduzido nas publicações recorrentes |
+| **Complexidade para o usuário** | Baixa | Alta | Baixa depois do primeiro cadastro |
+| **Principal ganho** | Adesão e rapidez | Rastreabilidade | Equilíbrio entre adesão e rastreabilidade |
+| **Principal perda** | Rastreabilidade | Facilidade de uso e adesão | Exige implementação e uso correto dos itens frequentes |
+
+## 13. Rastreabilidade das decisões (U2 → U1)
+
+Cada decisão de projeto responde a um requisito, risco ou restrição levantado na Unidade 1.
+
+| # | Decisão de projeto | Requisito/risco/restrição da Análise que a motiva | Como é validada |
+|---|---|---|---|
+| 1 | Atomicidade da reserva exclusiva — UPDATE condicional (compare-and-set) | **RN-02** (reserva exclusiva; transição `disponível → reservada` atômica) + o risco de **concorrência de reservas**, nomeado na análise como o maior risco do sistema | CA-03, CA-04, CA-05 |
+| 2 | Estratégia de expiração da reserva — expiração preguiçosa na leitura + varredura mínima para notificar | **RN-03** (expiração em 6 h, regra inventada pelo grupo), a serviço do **Objetivo 2** (aproveitamento auditável: a reserva expirada precisa cair no denominador) | CA-12, CA-13, CA-14, CA-15, CA-16 |
+| 3 | Fronteira de portabilidade do banco — SQL portável escrito à mão, contido em `repositorio.js` | **Restrição do caso** (SQLite em U1/U2 → PostgreSQL em U3) + compromissos do README (SQL contido em `db.js`/`repositorio.js`, sem vazar para a regra) + risco **"dificuldade técnica com as stacks"** da tabela de riscos | Mesma suíte de testes passando antes e depois da migração em U3 |
+
+## 14. Uso de IA
 
 Nível *colaboradora*: a IA gerou candidatas, o grupo corrigiu e responde pelo resultado.
 
