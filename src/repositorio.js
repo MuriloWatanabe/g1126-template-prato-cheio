@@ -21,19 +21,36 @@ export async function listarDisponiveis() {
     SELECT *
     FROM doacoes
     WHERE status = 'disponivel'
-    ORDER BY criada_em DESC, id DESC
+    ORDER BY criada_em ASC, id ASC
   `;
   const { rows } = await query(sql);
   return rows;
 }
 
-// TODO: buscar uma doação pelo id (devolver undefined se não existir).
-export async function buscarPorId(_id) {
-  throw new Error('não implementado: repositorio.buscarPorId');
+export async function buscarPorId(id) {
+  const sql = 'SELECT * FROM doacoes WHERE id = ?';
+  const { rows } = await query(sql, [id]);
+  return rows[0];
 }
 
-// TODO: marcar a doação como aceita pela ONG e devolver a linha atualizada.
-// Pense: como garantir que duas ONGs não aceitem a mesma doação?
-export async function aceitar(_id, _ong) {
-  throw new Error('não implementado: repositorio.aceitar');
+/**
+ * Marca a doação como aceita pela ONG e devolve a linha atualizada.
+ *
+ * RN-02 (reserva exclusiva): a condição `status = 'disponivel'` está DENTRO do
+ * UPDATE, não em um SELECT anterior. Um único comando testa e altera o estado,
+ * então duas ONGs aceitando ao mesmo tempo não conseguem as duas — a segunda
+ * não encontra linha para atualizar e recebe `undefined`.
+ * Ler antes e escrever depois abriria a janela entre as duas operações.
+ */
+export async function aceitar(id, ong) {
+  const sql = `
+    UPDATE doacoes
+       SET status    = 'aceita',
+           ong       = ?,
+           aceita_em = datetime('now')
+     WHERE id = ? AND status = 'disponivel'
+    RETURNING *
+  `;
+  const { rows } = await query(sql, [ong, id]);
+  return rows[0];
 }

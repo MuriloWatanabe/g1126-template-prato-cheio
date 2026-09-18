@@ -22,7 +22,20 @@ export async function listarDisponiveis() {
 }
 
 // História zero — "uma ONG aceita uma doação".
-// Regra do caso: uma doação aceita não fica disponível para outra ONG.
-export async function aceitar(_id, _ong) {
-  throw new Error('não implementado: aceitar');
+// RN-02: uma doação aceita não fica disponível para outra ONG.
+export async function aceitar(id, ong) {
+  const identificador = Number(id);
+  if (!Number.isInteger(identificador) || identificador <= 0) {
+    throw new Error('identificador de doação inválido');
+  }
+
+  const nomeOng = typeof ong === 'string' && ong.trim() ? ong.trim() : 'ONG';
+
+  const aceita = await repo.aceitar(identificador, nomeOng);
+  if (aceita) return aceita;
+
+  // Não atualizou: ou a doação não existe, ou já estava aceita (RN-02).
+  const existente = await repo.buscarPorId(identificador);
+  if (!existente) throw new Error('doação não encontrada');
+  throw new Error('esta doação já foi aceita por outra ONG');
 }

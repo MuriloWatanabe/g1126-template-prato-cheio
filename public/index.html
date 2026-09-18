@@ -13,6 +13,9 @@
     button { margin-top: .8rem; cursor: pointer; }
     li { border: 1px solid #ddd; border-radius: .5rem; padding: .6rem; margin-bottom: .5rem; list-style: none; }
     ul { padding: 0; }
+    #mensagem { padding: .6rem; border-radius: .5rem; margin-bottom: 1rem; display: none; }
+    #mensagem.sucesso { display: block; background: #e6f4ea; color: #1e7e34; border: 1px solid #b7dfc0; }
+    #mensagem.erro { display: block; background: #fdecea; color: #b3261e; border: 1px solid #f5c2c0; }
   </style>
 </head>
 <body>
@@ -30,9 +33,16 @@
   </fieldset>
 
   <h2>Doações disponíveis</h2>
+  <p id="mensagem"></p>
   <ul id="lista"></ul>
 
   <script>
+    function mostrarMensagem(texto, tipo) {
+      const mensagem = document.getElementById('mensagem');
+      mensagem.textContent = texto;
+      mensagem.className = tipo;
+    }
+
     async function carregar() {
       const res = await fetch('/api/doacoes');
       const doacoes = await res.json();
@@ -46,11 +56,17 @@
         const botao = document.createElement('button');
         botao.textContent = 'Aceitar';
         botao.onclick = async () => {
-          await fetch(`/api/doacoes/${d.id}/aceitar`, {
+          const res = await fetch(`/api/doacoes/${d.id}/aceitar`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ong: 'Minha ONG' })
           });
+          const resultado = await res.json();
+          if (res.ok) {
+            mostrarMensagem(`Doação aceita em ${resultado.aceita_em}.`, 'sucesso');
+          } else {
+            mostrarMensagem(resultado.erro, 'erro');
+          }
           carregar();
         };
         li.appendChild(botao);
