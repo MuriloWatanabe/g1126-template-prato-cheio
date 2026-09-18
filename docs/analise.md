@@ -314,7 +314,17 @@ e o risco "dificuldade técnica com as stacks do projeto" registrado na tabela d
 | **Principal ganho** | Adesão e rapidez | Rastreabilidade | Equilíbrio entre adesão e rastreabilidade |
 | **Principal perda** | Rastreabilidade | Facilidade de uso e adesão | Exige implementação e uso correto dos itens frequentes |
 
-## 13. Uso de IA
+## 13. Rastreabilidade das decisões (U2 → U1)
+
+Cada decisão de projeto responde a um requisito, risco ou restrição levantado na Unidade 1.
+
+| # | Decisão de projeto | Requisito/risco/restrição da Análise que a motiva | Como é validada |
+|---|---|---|---|
+| 1 | Atomicidade da reserva exclusiva — UPDATE condicional (compare-and-set) | **RN-02** (reserva exclusiva; transição `disponível → reservada` atômica) + o risco de **concorrência de reservas**, nomeado na análise como o maior risco do sistema | CA-03, CA-04, CA-05 |
+| 2 | Estratégia de expiração da reserva — expiração preguiçosa na leitura + varredura mínima para notificar | **RN-03** (expiração em 6 h, regra inventada pelo grupo), a serviço do **Objetivo 2** (aproveitamento auditável: a reserva expirada precisa cair no denominador) | CA-12, CA-13, CA-14, CA-15, CA-16 |
+| 3 | Fronteira de portabilidade do banco — SQL portável escrito à mão, contido em `repositorio.js` | **Restrição do caso** (SQLite em U1/U2 → PostgreSQL em U3) + compromissos do README (SQL contido em `db.js`/`repositorio.js`, sem vazar para a regra) + risco **"dificuldade técnica com as stacks"** da tabela de riscos | Mesma suíte de testes passando antes e depois da migração em U3 |
+
+## 14. Uso de IA
 
 Nível *colaboradora*: a IA gerou candidatas, o grupo corrigiu e responde pelo resultado.
 
