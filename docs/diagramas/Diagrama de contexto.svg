@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 660" font-family="'Segoe UI', Arial, sans-serif" role="img" aria-label="Diagrama de contexto do sistema Prato Cheio: no centro, a caixa do sistema (API Express + banco SQLite); ao redor, Doador e ONG com interação implementada (linha sólida âmbar), Voluntário entregador com interação planejada e fora da fatia atual (linha tracejada cinza) e CI/Monitoramento como sistema técnico (linha fina teal) consultando o health check.">
+  <defs>
+    <marker id="arrow-accent" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#C4791A"/>
+    </marker>
+    <marker id="arrow-planned" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7E889C"/>
+    </marker>
+    <marker id="arrow-tech" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3F6D74"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="920" height="660" fill="#F1F3EA"/>
+
+  <text x="460" y="34" text-anchor="middle" font-size="20" font-weight="700" fill="#1E2A22">Diagrama de contexto — Prato Cheio</text>
+  <text x="460" y="55" text-anchor="middle" font-size="12.5" fill="#5C6B5E">Doador publica · ONG vê e aceita · uma doação disponível vai para no máximo uma ONG (RN-02)</text>
+
+  <!-- spokes -->
+  <line x1="270" y1="180" x2="350" y2="270" stroke="#C4791A" stroke-width="2.5" marker-start="url(#arrow-accent)" marker-end="url(#arrow-accent)"/>
+  <line x1="650" y1="180" x2="570" y2="270" stroke="#C4791A" stroke-width="2.5" marker-start="url(#arrow-accent)" marker-end="url(#arrow-accent)"/>
+  <line x1="270" y1="490" x2="350" y2="410" stroke="#7E889C" stroke-width="2.3" stroke-dasharray="7 5" marker-start="url(#arrow-planned)" marker-end="url(#arrow-planned)"/>
+  <line x1="650" y1="490" x2="570" y2="410" stroke="#3F6D74" stroke-width="1.8" marker-start="url(#arrow-tech)" marker-end="url(#arrow-tech)"/>
+
+  <!-- system -->
+  <rect x="350" y="270" width="220" height="140" rx="16" fill="#E7EBDD" stroke="#1E2A22" stroke-width="2"/>
+  <text x="460" y="325" text-anchor="middle" font-size="21" font-weight="700" fill="#1E2A22">Prato Cheio</text>
+  <text x="460" y="346" text-anchor="middle" font-size="12" fill="#5C6B5E">API (Express) + banco SQLite embutido</text>
+  <text x="460" y="372" text-anchor="middle" font-size="10.5" font-family="Consolas, monospace" fill="#5C6B5E">src/app.js · doacoes.js · repositorio.js</text>
+  <text x="460" y="390" text-anchor="middle" font-size="11" font-style="italic" fill="#5C6B5E">uma doação disponível → aceita por no máx. 1 ONG</text>
+
+  <!-- Doador -->
+  <rect x="50" y="70" width="220" height="110" rx="12" fill="#FBFBF5" stroke="#1E2A22" stroke-width="1.6"/>
+  <text x="70" y="100" font-size="16.5" font-weight="700" fill="#1E2A22">Doador</text>
+  <text x="70" y="119" font-size="11.5" fill="#5C6B5E">Restaurantes, padarias, mercados</text>
+  <rect x="70" y="130" width="98" height="18" rx="9" fill="#F1DDBA"/>
+  <text x="119" y="142.5" text-anchor="middle" font-size="10.5" font-family="Consolas, monospace" fill="#7A4A0E">IMPLEMENTADO</text>
+
+  <!-- ONG -->
+  <rect x="650" y="70" width="220" height="110" rx="12" fill="#FBFBF5" stroke="#1E2A22" stroke-width="1.6"/>
+  <text x="670" y="100" font-size="16.5" font-weight="700" fill="#1E2A22">ONG</text>
+  <text x="670" y="119" font-size="11.5" fill="#5C6B5E">Cozinha comunitária que retira e distribui</text>
+  <rect x="670" y="130" width="98" height="18" rx="9" fill="#F1DDBA"/>
+  <text x="719" y="142.5" text-anchor="middle" font-size="10.5" font-family="Consolas, monospace" fill="#7A4A0E">IMPLEMENTADO</text>
+
+  <!-- Voluntario -->
+  <rect x="50" y="490" width="220" height="110" rx="12" fill="#FBFBF5" stroke="#7E889C" stroke-width="1.6" stroke-dasharray="5 4"/>
+  <text x="70" y="520" font-size="16.5" font-weight="700" fill="#1E2A22">Voluntário entregador</text>
+  <text x="70" y="539" font-size="11.5" fill="#5C6B5E">Confirma a coleta na rua</text>
+  <rect x="70" y="550" width="76" height="18" rx="9" fill="#E4E6ED"/>
+  <text x="108" y="562.5" text-anchor="middle" font-size="10.5" font-family="Consolas, monospace" fill="#7E889C">PLANEJADO</text>
+
+  <!-- CI -->
+  <rect x="650" y="490" width="220" height="110" rx="12" fill="#FBFBF5" stroke="#3F6D74" stroke-width="1.4"/>
+  <text x="670" y="520" font-size="16.5" font-weight="700" fill="#1E2A22">CI / Monitoramento</text>
+  <text x="670" y="539" font-size="11.5" fill="#5C6B5E">Health check automatizado</text>
+  <rect x="670" y="550" width="60" height="18" rx="9" fill="#DCE7E8"/>
+  <text x="700" y="562.5" text-anchor="middle" font-size="10.5" font-family="Consolas, monospace" fill="#3F6D74">TÉCNICO</text>
+
+  <!-- chips -->
+  <rect x="215" y="202" width="182" height="42" rx="8" fill="#FBFBF5"/>
+  <text x="306" y="219" text-anchor="middle" font-size="12" fill="#1E2A22">&#8594; dados da doação</text>
+  <text x="306" y="236" text-anchor="middle" font-size="12" fill="#7A4A0E">&#8592; confirmação + id</text>
+
+  <rect x="523" y="202" width="182" height="42" rx="8" fill="#FBFBF5"/>
+  <text x="614" y="219" text-anchor="middle" font-size="12" fill="#1E2A22">&#8594; consulta / aceite</text>
+  <text x="614" y="236" text-anchor="middle" font-size="12" fill="#7A4A0E">&#8592; lista / status</text>
+
+  <rect x="215" y="428" width="182" height="42" rx="8" fill="#FBFBF5"/>
+  <text x="306" y="445" text-anchor="middle" font-size="12" fill="#1E2A22">&#8594; coleta confirmada</text>
+  <text x="306" y="462" text-anchor="middle" font-size="12" fill="#7E889C">&#8592; endereço / horário</text>
+
+  <rect x="523" y="428" width="182" height="42" rx="8" fill="#FBFBF5"/>
+  <text x="614" y="445" text-anchor="middle" font-size="12" fill="#1E2A22">&#8594; verificação (ping)</text>
+  <text x="614" y="462" text-anchor="middle" font-size="12" fill="#3F6D74">&#8592; status ok</text>
+
+  <!-- legend -->
+  <g transform="translate(50,625)" font-size="11.5" fill="#5C6B5E">
+    <line x1="0" y1="-4" x2="24" y2="-4" stroke="#C4791A" stroke-width="2.5"/>
+    <text x="30" y="0">implementado (história zero)</text>
+    <line x1="250" y1="-4" x2="274" y2="-4" stroke="#7E889C" stroke-width="2.3" stroke-dasharray="7 5"/>
+    <text x="280" y="0">planejado (fora da fatia atual)</text>
+    <line x1="540" y1="-4" x2="564" y2="-4" stroke="#3F6D74" stroke-width="1.8"/>
+    <text x="570" y="0">sistema técnico</text>
+  </g>
+</svg>
