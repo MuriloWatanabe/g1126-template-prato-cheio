@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 660" font-family="'Segoe UI', Arial, sans-serif" role="img" aria-label="Modelo de dados final do Prato Cheio, corrigido após a revisão com IA: a tabela Doação no centro, com chaves estrangeiras para Doador (obrigatória), ONG e Voluntário (opcionais, no máximo um de cada por doação). Campos corrigidos estão destacados em âmbar com a referência do erro da IA." xmlns:c2pa="http://c2pa.org/manifest"><metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYTowOWI3MDRhNC1kZWVlLTQxNDctYTU1MC1mYzE3MjhjMzBlODUAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaD0UxvBJaFXJIRlkoqu+E+YAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDphNTEzNzc0Ni02NTEwLTQ2YjEtYTRmNS04ZWI5YWUyMzY4NDBscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNoSBjExFlsMwmoM7zJr/tlPQAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggMU1tntcjR9qgVPQWlthTk9iXBxEz1SkNzzGybhEuaXikZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaHUSRgyrmZFRWGxY7DIc5GwAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRMAAAAAAAAAAAAAAAAZGhhc2hYILuP2xRb3ExrBOpmeZrfdZPcBSZk70Ml4LDEZssh/OPUZG5hbWVuanVtYmYgbWFuaWZlc3RqZXhjbHVzaW9uc4GiZXN0YXJ0GQHtZmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOjA5YjcwNGE0LWRlZWUtNDE0Ny1hNTUwLWZjMTcyOGMzMGU4NS9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOjcyNzkxYTg5LTJjMjctNDk2Yy04MDMyLWQ1MTY5ZGZmNjQ1NXJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCAxTW2e1yNH2qBU9BaW2FOT2JcHETPVKQ3PMbJuES5peKJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggJ4LHI3nclm5H5LyQa+pj/9i47WrfRod1Gc3H7nmWsviiY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFggt9sgI33Uw2tntp14hdCM2OpXYJqLxmN3q8L3kVCfG2B0Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQASw9HQEf7j8VOMDzw1DOB4ylV1vPrswwxa/0tC/jYhuA0pYKWnMtk74lh7/IZ6p2k55FYq2Mh1uH36CPWWSWrk=</c2pa:manifest></metadata>
+  <rect x="0" y="0" width="940" height="660" fill="#F1F3EA"/>
+
+  <text x="470" y="34" text-anchor="middle" font-size="20" font-weight="700" fill="#1E2A22">Modelo de dados — versão final (pós-revisão com IA)</text>
+  <text x="470" y="55" text-anchor="middle" font-size="12.5" fill="#5C6B5E">Uma doação pertence a um doador e é aceita por no máximo uma ONG (RN-02) e coletada por no máximo um voluntário (RN-03)</text>
+
+  <!-- ===== Relacionamentos ===== -->
+  <!-- Doador 1 — 0..N Doação -->
+  <line x1="450" y1="150" x2="610" y2="150" stroke="#1E2A22" stroke-width="1.8"/>
+  <text x="458" y="143" font-size="12" font-weight="700" fill="#1E2A22">0..N</text>
+  <text x="598" y="143" text-anchor="end" font-size="12" font-weight="700" fill="#1E2A22">1</text>
+  <text x="530" y="168" text-anchor="middle" font-size="11.5" font-style="italic" fill="#5C6B5E">publica</text>
+
+  <!-- ONG 0..1 — 0..N Doação -->
+  <line x1="450" y1="310" x2="610" y2="310" stroke="#C4791A" stroke-width="2.4"/>
+  <text x="458" y="303" font-size="12" font-weight="700" fill="#1E2A22">0..N</text>
+  <text x="598" y="303" text-anchor="end" font-size="12" font-weight="700" fill="#C4791A">0..1</text>
+  <text x="530" y="328" text-anchor="middle" font-size="11.5" font-style="italic" fill="#5C6B5E">aceita (RN-02)</text>
+  <text x="530" y="342" text-anchor="middle" font-size="10.5" font-weight="700" fill="#C4791A">E1</text>
+
+  <!-- Voluntário 0..1 — 0..N Doação -->
+  <polyline points="450,430 530,430 530,470 610,470" fill="none" stroke="#7E889C" stroke-width="2" stroke-dasharray="7 5"/>
+  <text x="458" y="423" font-size="12" font-weight="700" fill="#1E2A22">0..N</text>
+  <text x="598" y="463" text-anchor="end" font-size="12" font-weight="700" fill="#1E2A22">0..1</text>
+  <text x="600" y="488" text-anchor="end" font-size="11.5" font-style="italic" fill="#5C6B5E">coleta (RN-03)</text>
+
+  <!-- ===== Doação ===== -->
+  <rect x="50" y="90" width="400" height="362" rx="12" fill="#FBFBF5" stroke="#1E2A22" stroke-width="1.8"/>
+  <path d="M50,102 a12,12 0 0 1 12,-12 h376 a12,12 0 0 1 12,12 v28 h-400 z" fill="#E7EBDD"/>
+  <line x1="50" y1="130" x2="450" y2="130" stroke="#1E2A22" stroke-width="1.2"/>
+  <text x="68" y="116" font-size="16.5" font-weight="700" fill="#1E2A22">doacoes</text>
+  <text x="432" y="116" text-anchor="end" font-size="11" fill="#5C6B5E">tabela central</text>
+
+  <g font-size="12.5" fill="#1E2A22">
+    <text x="68" y="154"><tspan font-weight="700">id</tspan></text>
+    <text x="200" y="154" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">INTEGER · PK</text>
+
+    <text x="68" y="177">id_doador</text>
+    <text x="200" y="177" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">FK → doadores · NOT NULL</text>
+
+    <text x="68" y="200">tipo</text>
+    <text x="200" y="200" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">TEXT · NOT NULL</text>
+
+    <text x="68" y="223" fill="#C4791A" font-weight="700">quantidade</text>
+    <text x="200" y="223" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">NUMERIC · NOT NULL · &gt; 0</text>
+    <text x="436" y="223" text-anchor="end" font-size="10.5" font-weight="700" fill="#C4791A">E2</text>
+
+    <text x="68" y="246" fill="#C4791A" font-weight="700">unidade</text>
+    <text x="200" y="246" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">TEXT · NOT NULL</text>
+    <text x="436" y="246" text-anchor="end" font-size="10.5" font-weight="700" fill="#C4791A">E2</text>
+
+    <text x="68" y="269">validade</text>
+    <text x="200" y="269" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">TEXT ISO-8601 · NOT NULL</text>
+
+    <text x="68" y="292" fill="#C4791A" font-weight="700">status</text>
+    <text x="200" y="292" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">TEXT · NOT NULL · CHECK</text>
+    <text x="436" y="292" text-anchor="end" font-size="10.5" font-weight="700" fill="#C4791A">E4</text>
+    <text x="200" y="306" font-family="Consolas, monospace" font-size="10.5" fill="#5C6B5E">disponivel|aceita|coletada|perdida</text>
+
+    <text x="68" y="329" fill="#C4791A" font-weight="700">id_ong</text>
+    <text x="200" y="329" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">FK → ongs · NULL</text>
+    <text x="436" y="329" text-anchor="end" font-size="10.5" font-weight="700" fill="#C4791A">E1</text>
+
+    <text x="68" y="352" fill="#C4791A" font-weight="700">aceita_em</text>
+    <text x="200" y="352" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">TEXT ISO-8601 · NULL</text>
+    <text x="436" y="352" text-anchor="end" font-size="10.5" font-weight="700" fill="#C4791A">E4</text>
+
+    <text x="68" y="375">id_voluntario</text>
+    <text x="200" y="375" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">FK → voluntarios · NULL</text>
+
+    <text x="68" y="398" fill="#C4791A" font-weight="700">coletada_em</text>
+    <text x="200" y="398" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">TEXT ISO-8601 · NULL</text>
+    <text x="436" y="398" text-anchor="end" font-size="10.5" font-weight="700" fill="#C4791A">E4</text>
+
+    <text x="68" y="421">criada_em</text>
+    <text x="200" y="421" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">TEXT ISO-8601 · NOT NULL</text>
+  </g>
+  <text x="68" y="442" font-size="10.5" font-style="italic" fill="#5C6B5E">foto, categoria e localização ficam fora do modelo (fora da fatia) — E2</text>
+
+  <!-- ===== Entidades de papel ===== -->
+  <g font-size="12.5" fill="#1E2A22">
+    <!-- Doador -->
+    <rect x="610" y="90" width="280" height="120" rx="12" fill="#FBFBF5" stroke="#1E2A22" stroke-width="1.6"/>
+    <path d="M610,102 a12,12 0 0 1 12,-12 h256 a12,12 0 0 1 12,12 v22 h-280 z" fill="#E7EBDD"/>
+    <line x1="610" y1="124" x2="890" y2="124" stroke="#1E2A22" stroke-width="1"/>
+    <text x="626" y="113" font-size="15" font-weight="700">doadores</text>
+    <text x="626" y="146"><tspan font-weight="700">id</tspan><tspan x="740" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">INTEGER · PK</tspan></text>
+    <text x="626" y="166">nome<tspan x="740" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">TEXT · NOT NULL</tspan></text>
+    <text x="626" y="186">documento<tspan x="740" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">TEXT · UNIQUE</tspan></text>
+    <text x="626" y="203">criado_em<tspan x="740" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">TEXT</tspan></text>
+
+    <!-- ONG -->
+    <rect x="610" y="250" width="280" height="120" rx="12" fill="#FBFBF5" stroke="#1E2A22" stroke-width="1.6"/>
+    <path d="M610,262 a12,12 0 0 1 12,-12 h256 a12,12 0 0 1 12,12 v22 h-280 z" fill="#E7EBDD"/>
+    <line x1="610" y1="284" x2="890" y2="284" stroke="#1E2A22" stroke-width="1"/>
+    <text x="626" y="273" font-size="15" font-weight="700">ongs</text>
+    <text x="626" y="306"><tspan font-weight="700">id</tspan><tspan x="740" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">INTEGER · PK</tspan></text>
+    <text x="626" y="326">nome<tspan x="740" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">TEXT · NOT NULL</tspan></text>
+    <text x="626" y="346">documento<tspan x="740" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">TEXT · UNIQUE</tspan></text>
+    <text x="626" y="363">criado_em<tspan x="740" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">TEXT</tspan></text>
+
+    <!-- Voluntário -->
+    <rect x="610" y="410" width="280" height="120" rx="12" fill="#FBFBF5" stroke="#7E889C" stroke-width="1.6" stroke-dasharray="6 4"/>
+    <path d="M610,422 a12,12 0 0 1 12,-12 h256 a12,12 0 0 1 12,12 v22 h-280 z" fill="#E4E7EC"/>
+    <line x1="610" y1="444" x2="890" y2="444" stroke="#7E889C" stroke-width="1"/>
+    <text x="626" y="433" font-size="15" font-weight="700">voluntarios</text>
+    <text x="874" y="433" text-anchor="end" font-size="10.5" fill="#7E889C">planejado</text>
+    <text x="626" y="466"><tspan font-weight="700">id</tspan><tspan x="740" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">INTEGER · PK</tspan></text>
+    <text x="626" y="486">nome<tspan x="740" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">TEXT · NOT NULL</tspan></text>
+    <text x="626" y="506">documento<tspan x="740" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">TEXT · UNIQUE</tspan></text>
+    <text x="626" y="523">criado_em<tspan x="740" font-family="Consolas, monospace" font-size="11.5" fill="#5C6B5E">TEXT</tspan></text>
+  </g>
+  <text x="750" y="548" text-anchor="middle" font-size="10.5" font-style="italic" fill="#5C6B5E">três tabelas de papel, sem e-mail/senha — login fora da fatia (E3)</text>
+
+  <!-- ===== Legenda ===== -->
+  <line x1="50" y1="572" x2="890" y2="572" stroke="#C9CFBE" stroke-width="1"/>
+  <line x1="60" y1="596" x2="96" y2="596" stroke="#1E2A22" stroke-width="1.8"/>
+  <text x="104" y="600" font-size="11.5" fill="#1E2A22">obrigatório (doação sempre tem doador)</text>
+  <line x1="380" y1="596" x2="416" y2="596" stroke="#C4791A" stroke-width="2.4"/>
+  <text x="424" y="600" font-size="11.5" fill="#1E2A22">no máx. 1 ONG por doação — coluna única + UPDATE condicional (ADR 1)</text>
+  <line x1="60" y1="620" x2="96" y2="620" stroke="#7E889C" stroke-width="2" stroke-dasharray="7 5"/>
+  <text x="104" y="624" font-size="11.5" fill="#1E2A22">planejado (RN-03, fora da história zero)</text>
+  <text x="380" y="624" font-size="11.5" fill="#C4791A" font-weight="700">âmbar</text>
+  <text x="424" y="624" font-size="11.5" fill="#1E2A22">= campo corrigido após a revisão; E1–E4 remetem aos erros da IA</text>
+  <text x="470" y="648" text-anchor="middle" font-size="10.5" fill="#5C6B5E">Ver "Revisão com IA - Modelo de dados.md" nesta pasta · baseado em src/db.js e docs/analise.md (branch entrega-2409)</text>
+</svg>
