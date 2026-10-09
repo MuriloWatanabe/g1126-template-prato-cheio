@@ -16,6 +16,8 @@
 ## ADRs
 Ver `docs/adr/`.
 
+- [ADR 0001 — Migração do banco de SQLite para PostgreSQL (em contêiner)](adr/0001-migracao-sqlite-postgresql.md): aceito, 2026-10-09
+
 ## Requisitos não-funcionais
 # Requisitos funcionais — Prato Cheio
 
