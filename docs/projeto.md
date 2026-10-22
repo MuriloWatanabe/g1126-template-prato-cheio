@@ -29,4 +29,28 @@ Ver `docs/adr/`.
 
 ## Critérios de validação do projeto
 
+| # | Critério | Sim/Não | Fonte |
+|---|---|:--:|---|
+| 1 | **(migração)** O ADR da migração tem `Status` e `Data` preenchidos no cabeçalho e aparece com link em `## ADRs`? | Sim | `docs/adr/0001-migracao-sqlite-postgresql.md` (cabeçalho); `docs/projeto.md` § ADRs |
+| 2 | **(migração)** Cada linha da tabela *Critério de validação* do ADR da migração traz um comando que pode ser copiado e executado no terminal? | Sim | `docs/adr/0001-migracao-sqlite-postgresql.md` § Critério de validação |
+| 3 | **(migração)** O comando `grep -rnE '\b(SELECT\|INSERT\|UPDATE\|DELETE)\b' src/ \| grep -v -e '^src/repositorio.js' -e '^src/db.js'` termina sem imprimir nenhuma linha? | Sim | `src/` |
+| 4 | **(migração)** Existe em `tests/` um teste do CA-05 que dispara dois `POST /aceitar` ao mesmo tempo (`Promise.all`) na mesma doação e espera exatamente um `200` e um `400`? | Não | `tests/doacoes.test.js`; ADR 0001 § Critério de validação, linha 1 |
+| 5 | Existe teste em que a segunda ONG tenta aceitar uma doação já aceita, recebe erro e o aceite da primeira continua gravado (CA-04, RN-02)? | Não | `tests/doacoes.test.js` |
+| 6 | Os três requisitos de `## Requisitos não-funcionais` têm, cada um, as partes **Quando**, **o sistema** e **Medido por**, e o *Medido por* contém um número? | Sim | `docs/projeto.md` § Requisitos não-funcionais |
+| 7 | Cada decisão da tabela de rastreabilidade cita uma regra (RN-xx), um critério (CA-xx), um risco ou uma restrição que existe na Análise? | Não | `docs/analise.md` § 13, conferido contra §§ 5, 7 e 8 |
+| 8 | O workflow de CI dispara em `pull_request` e tem um passo `npm test` e um passo `curl --fail` em `/api/saude`? | Sim | `.github/workflows/ci.yml` |
+| 9 | A proteção da `main` (PR obrigatório, 1 aprovação, check `build-e-testes`) está registrada com print da tela de configuração? | Sim | `docs/evidencias/protecao-main.md` |
+
+**Por que os "não":**
+- **4:** os testes cobrem CA-01, 02, 03, 04 e 08. Não há teste do CA-05 (aceites simultâneos), que é a pré-condição da migração no ADR 0001.
+- **5:** o teste do CA-04 confere o erro da ONG B e a resposta do primeiro aceite, mas não relê a doação depois da segunda tentativa. Então não prova que a ONG A e o horário original continuam gravados.
+- **7:** a decisão 2 cita CA-12 a CA-16, mas a seção 7 só vai até CA-11 (os critérios de RN-03 são CA-09 a CA-11). A decisão 1 cita o "risco de concorrência de reservas", que não está na tabela de riscos da seção 8.
+
+### Fragilidades apontadas pelo revisor interno
+
+| # | Fragilidade (copiada do comentário do revisor) | Resposta da equipe |
+|---|---|---|
+| F-1 | "O critério 2 foi respondido com sim, mas as linhas 2, 3 e 4 da tabela de validação do ADR 0001 usam `<commit-antes>`, que ainda não existe, e a linha 6 depende de ver o CI verde no GitHub. Hoje nenhuma delas pode ser copiada e executada como está." | **Aceita como limitação.** O commit de referência só vai existir no PR da migração, e o resultado do CI não fica versionado no repositório. O critério 2 passa a ser verificável a partir desse PR. |
+| F-2 | "O critério 6 foi respondido com sim, mas há um título `# Requisitos funcionais — Prato Cheio` logo abaixo de `## Requisitos não-funcionais`. No Markdown, a tabela fica sob esse título, e não sob a seção de não-funcionais." | **Corrigida** em [HASH](https://github.com/MuriloWatanabe/g1126-template-prato-cheio/commit/HASH): o título errado foi removido e a tabela voltou a ficar sob `## Requisitos não-funcionais`. |
+
 ## Uso de IA
