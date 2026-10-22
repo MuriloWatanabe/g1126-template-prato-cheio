@@ -5,11 +5,27 @@
 ## Decisões de projeto
 | # | Decisão | Alternativas | Requisito/risco da Análise que a motiva |
 |---|---|---|---|
+| 1 | Garantir o aceite exclusivo com um único `UPDATE … WHERE id = ? AND status = 'disponivel'` (compare-and-set): quem altera a linha ganha, quem não encontra linha disponível recebe "já aceita por outra ONG". Detalhe em `analise.md` §11. | (a) `UPDATE` condicional — escolhida: atômico por linha e o mesmo SQL no SQLite e no PostgreSQL; (b) transação com bloqueio explícito (`BEGIN IMMEDIATE` no SQLite, `SELECT … FOR UPDATE` no PostgreSQL) — lê como "leio, checo, gravo", mas o mecanismo muda de banco para banco. | **RN-02** (reserva exclusiva) e o risco de concorrência no aceite, apontado como o maior do sistema; CA-03, CA-04, CA-05. Ver a tabela de trade-offs abaixo. |
+| 2 | Expirar a reserva não coletada em 6 h **na leitura** da lista (expiração preguiçosa), com o relógio injetado nas regras; uma varredura mínima só emite as notificações, sem ser dona da mudança de estado. Detalhe em `analise.md` §11. | (a) expiração preguiçosa + varredura só para notificar — escolhida: determinística e testável sem espera real; (b) varredura ativa periódica (`setInterval`) como dona da expiração — notifica na hora, mas abre uma janela entre "expirou" e "a varredura rodou" e compete com a escrita do aceite. | **RN-03** (expiração em 6 h, inventada pelo grupo) e **Objetivo 2** (aproveitamento auditável); CA-12 a CA-16. Ainda sem código: depende da história de coleta. |
+| 3 | Fronteira de portabilidade do banco: todo SQL escrito à mão, portável, e contido em `src/repositorio.js` e `src/db.js`; `doacoes.js` e `app.js` não veem SQL. Detalhe em `analise.md` §11; o item "evitar `RETURNING`" do checklist foi substituído pelo [ADR 0001](adr/0001-migracao-sqlite-postgresql.md). | (a) SQL portável à mão — escolhida: nenhuma dependência nova e poucas consultas; (b) query builder (Knex) — a troca de banco vira configuração, mas traz dependência e curva de aprendizado. | **Restrição técnica do caso** (SQLite na U1/U2 → PostgreSQL na U3) e o risco **"dificuldade técnica com a stack"** (`analise.md` §8); RNF-02. |
 | 4 | Identificar o doador pelo nome informado na publicação (coluna `doador`, opcional), sem login. As histórias "doador vê as próprias doações" e "doador cancela doação disponível" usam esse nome; o cancelamento só vale para quem publicou e só enquanto a doação está `disponivel`, com a condição dentro do `UPDATE`, como no aceite. | (a) nome livre na publicação, sem login — escolhida: não interpõe identidade entre a ação e o dado medido; (b) cadastro e login do doador — identidade forte, mas abre o cadastro de perfis e atrasa o núcleo transacional. | *Fora da fatia* da Análise (login e cadastro de perfis); RN-02 (o cancelamento não pode competir com o aceite). Custo: quem souber o nome de um doador vê e cancela as doações dele; revisitar quando houver login. |
 
 ## Tabela de trade-offs (uma decisão em detalhe)
-| Critério | Alternativa A | Alternativa B |
+Decisão 1 — como garantir que só uma ONG aceite a mesma doação.
+
+| Critério | A — `UPDATE` condicional (compare-and-set) | B — transação com bloqueio explícito |
 |---|---|---|
+| Garantia sob corrida (RN-02, CA-05) | Atômica: testar e alterar o status é uma só instrução | Atômica, desde que todo caminho que altera a doação abra a transação e trave a linha |
+| Portabilidade SQLite → PostgreSQL | O mesmo SQL roda nos dois bancos | Muda de banco para banco: `BEGIN IMMEDIATE` no SQLite, `SELECT … FOR UPDATE` no PostgreSQL |
+| Alcance do bloqueio | Uma instrução; no PostgreSQL, só a linha | No SQLite trava o banco inteiro durante toda a transação |
+| Código e chance de erro | 1 instrução em `repositorio.js`, reaproveitada no cancelamento (decisão 4) | 3 passos (ler, checar, gravar) mais `COMMIT`/`ROLLBACK` em cada caminho |
+| Testabilidade | Dois aceites em `Promise.all` → um `200` e um `400` | O mesmo teste, mas o bloqueio só é exercitado com conexões separadas |
+| Aceite que toque várias tabelas no futuro | Precisará ser envolvido numa transação | Já está pronta para isso |
+| Leitura do código | Menos linear: o resultado vem das linhas afetadas | Lê como "leio, checo, gravo" |
+
+**Escolhida: A.** Pesaram a garantia sob corrida e a portabilidade: são o maior risco do sistema e a
+migração da U3. O custo aceito é reescrever o aceite como transação se ele um dia tocar mais de
+uma tabela.
 
 ## Diagramas
 (contexto + dados ou componentes — em `docs/` ou como imagem)
