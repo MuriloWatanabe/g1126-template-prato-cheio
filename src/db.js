@@ -9,13 +9,34 @@
 import { createRequire } from 'node:module';
 const { DatabaseSync } = createRequire(import.meta.url)('node:sqlite');
 
-const ARQUIVO = process.env.DATABASE_FILE || 'dados.sqlite';
+// Banco exclusivo dos testes: SQLite em memória, que nasce vazio e some ao fim
+// do processo. Nenhum dado real vive nele.
+export const BANCO_DE_TESTE = ':memory:';
+
+// Mudança de contexto (etapa 4, história 4b): os testes rodaram na máquina do
+// piloto com DATABASE_FILE apontando para o banco real e a limpeza apagou as
+// doações. Por isso, sob o Vitest, o banco é SEMPRE o de teste — nenhuma
+// configuração externa (variável de ambiente, .env, vitest.config) o troca.
+function escolherArquivo() {
+  if (process.env.VITEST) return BANCO_DE_TESTE;
+  return process.env.DATABASE_FILE || 'dados.sqlite';
+}
 
 let db;
+let arquivoEmUso;
 
 export function conexao() {
-  if (!db) db = new DatabaseSync(ARQUIVO);
+  if (!db) {
+    arquivoEmUso = escolherArquivo();
+    db = new DatabaseSync(arquivoEmUso);
+  }
   return db;
+}
+
+/** Arquivo do banco aberto pela conexão atual (':memory:' nos testes). */
+export function bancoEmUso() {
+  conexao();
+  return arquivoEmUso;
 }
 
 /**
@@ -53,11 +74,21 @@ export async function migrar() {
   }
 }
 
-/** Apaga todos os dados. Usado pelos testes. */
+/**
+ * Apaga todos os dados. Usado pelos testes.
+ * Segunda trava da história 4b: confere o banco em uso e recusa apagar
+ * qualquer um que não seja o de teste, mesmo se chamada fora do Vitest.
+ */
 export async function limparBanco() {
+  const arquivo = bancoEmUso();
+  if (arquivo !== BANCO_DE_TESTE) {
+    throw new Error(
+      `limparBanco recusado: o banco em uso (${arquivo}) não é o banco de teste`
+    );
+  }
   conexao().exec('DELETE FROM doacoes');
 }
 
 export async function encerrar() {
-  if (db) { db.close(); db = undefined; }
+  if (db) { db.close(); db = undefined; arquivoEmUso = undefined; }
 }
