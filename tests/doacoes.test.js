@@ -138,3 +138,44 @@ describe('aceitar uma doação', () => {
     expect(res.body.erro).toMatch(/não encontrada/);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Fatia 2 (docs/analise.md) — a ONG filtra as disponíveis por tipo e vê a validade.
+// ---------------------------------------------------------------------------
+
+describe('filtrar disponíveis por tipo', () => {
+  // Dado doações de pão, arroz e pão de forma disponíveis
+  // Quando a ONG filtra por "pão"
+  // Então vê só as de pão, com a validade, da mais antiga para a mais recente
+  it('mostra só as doações do tipo filtrado, com validade', async () => {
+    const pao = await publicar({ tipo: 'Pão francês', quantidade: '5 kg', validade: '2026-12-01' });
+    await publicar({ tipo: 'Arroz', quantidade: '10 kg', validade: '2026-12-02' });
+    const forma = await publicar({ tipo: 'pão de forma', quantidade: '3 pacotes', validade: '2026-12-03' });
+
+    const res = await request(app).get('/api/doacoes').query({ tipo: 'pão' });
+    expect(res.status).toBe(200);
+    expect(res.body.map((d) => d.id)).toEqual([pao.body.id, forma.body.id]);
+    expect(res.body[0].validade).toBe('2026-12-01');
+  });
+
+  // Dado uma doação de pão já aceita pela ONG A
+  // Quando a ONG B filtra por "pão"
+  // Então a doação aceita não aparece (RN-02 continua valendo com filtro)
+  it('não mostra doação aceita mesmo quando o tipo bate', async () => {
+    const { body: criada } = await publicar();
+    await request(app).post(`/api/doacoes/${criada.id}/aceitar`).send({ ong: 'ONG A' });
+
+    const res = await request(app).get('/api/doacoes').query({ tipo: 'pão' });
+    expect(res.body).toHaveLength(0);
+  });
+
+  // Dado doações disponíveis
+  // Quando a ONG filtra por um tipo que ninguém doou
+  // Então recebe lista vazia, sem erro
+  it('devolve lista vazia quando nenhum tipo bate', async () => {
+    await publicar();
+    const res = await request(app).get('/api/doacoes').query({ tipo: 'feijão' });
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual([]);
+  });
+});

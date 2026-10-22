@@ -17,8 +17,11 @@ export async function criarDoacao({ tipo, quantidade, validade }) {
 }
 
 // História zero — "uma ONG vê as doações disponíveis".
-export async function listarDisponiveis() {
-  return await repo.listarDisponiveis();
+// Fatia 2 — "a ONG filtra as disponíveis por tipo e vê a validade".
+// Sem tipo (ou tipo em branco), devolve todas as disponíveis.
+export async function listarDisponiveis({ tipo } = {}) {
+  const t = typeof tipo === 'string' ? tipo.trim() : '';
+  return await repo.listarDisponiveis({ tipo: t || undefined });
 }
 
 // História zero — "uma ONG aceita uma doação".

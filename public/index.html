@@ -33,6 +33,8 @@
   </fieldset>
 
   <h2>Doações disponíveis</h2>
+  <label for="filtro-tipo">Filtrar por tipo</label>
+  <input id="filtro-tipo" placeholder="Ex.: pão">
   <p id="mensagem"></p>
   <ul id="lista"></ul>
 
@@ -44,7 +46,8 @@
     }
 
     async function carregar() {
-      const res = await fetch('/api/doacoes');
+      const tipo = document.getElementById('filtro-tipo').value.trim();
+      const res = await fetch('/api/doacoes' + (tipo ? `?tipo=${encodeURIComponent(tipo)}` : ''));
       const doacoes = await res.json();
       const lista = document.getElementById('lista');
       lista.innerHTML = doacoes.length
@@ -73,6 +76,8 @@
         lista.appendChild(li);
       }
     }
+
+    document.getElementById('filtro-tipo').oninput = carregar;
 
     document.getElementById('publicar').onclick = async () => {
       await fetch('/api/doacoes', {

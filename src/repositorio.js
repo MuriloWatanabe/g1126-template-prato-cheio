@@ -16,14 +16,22 @@ export async function inserir({ tipo, quantidade, validade }) {
   return rows[0];
 }
 
-export async function listarDisponiveis() {
+export async function listarDisponiveis({ tipo } = {}) {
+  // Filtro opcional por tipo: trecho do nome, sem diferenciar maiúsculas.
+  // LOWER e LIKE existem igual no SQLite e no PostgreSQL (RNF-02).
+  const filtros = ["status = 'disponivel'"];
+  const valores = [];
+  if (tipo) {
+    filtros.push('LOWER(tipo) LIKE ?');
+    valores.push(`%${tipo.toLowerCase()}%`);
+  }
   const sql = `
     SELECT *
     FROM doacoes
-    WHERE status = 'disponivel'
+    WHERE ${filtros.join(' AND ')}
     ORDER BY criada_em ASC, id ASC
   `;
-  const { rows } = await query(sql);
+  const { rows } = await query(sql, valores);
   return rows;
 }
 

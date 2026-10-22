@@ -11,7 +11,7 @@ export function criarApp() {
 
   app.get('/api/doacoes', async (req, res) => {
     try {
-      res.json(await doacoes.listarDisponiveis());
+      res.json(await doacoes.listarDisponiveis({ tipo: req.query.tipo }));
     } catch (erro) {
       res.status(400).json({ erro: erro.message });
     }
