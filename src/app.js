@@ -11,7 +11,7 @@ export function criarApp() {
 
   app.get('/api/doacoes', async (req, res) => {
     try {
-      res.json(await doacoes.listarDisponiveis());
+      res.json(await doacoes.listarDisponiveis({ tipo: req.query.tipo }));
     } catch (erro) {
       res.status(400).json({ erro: erro.message });
     }
@@ -25,9 +25,25 @@ export function criarApp() {
     }
   });
 
+  app.get('/api/doadores/:doador/doacoes', async (req, res) => {
+    try {
+      res.json(await doacoes.listarDoDoador(req.params.doador));
+    } catch (erro) {
+      res.status(400).json({ erro: erro.message });
+    }
+  });
+
   app.post('/api/doacoes/:id/aceitar', async (req, res) => {
     try {
       res.json(await doacoes.aceitar(req.params.id, req.body?.ong ?? 'ONG'));
+    } catch (erro) {
+      res.status(400).json({ erro: erro.message });
+    }
+  });
+
+  app.post('/api/doacoes/:id/cancelar', async (req, res) => {
+    try {
+      res.json(await doacoes.cancelar(req.params.id, req.body?.doador));
     } catch (erro) {
       res.status(400).json({ erro: erro.message });
     }

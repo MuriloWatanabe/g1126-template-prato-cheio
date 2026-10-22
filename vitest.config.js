@@ -1,6 +1,6 @@
 export default {
   test: {
-    // SQLite em memória: os testes não tocam o arquivo do banco de desenvolvimento.
-    env: { DATABASE_FILE: ':memory:' }
+    // O banco dos testes NÃO é configurado aqui: src/db.js usa sempre o SQLite
+    // em memória quando roda sob o Vitest, e ignora DATABASE_FILE (história 4b).
   }
 };

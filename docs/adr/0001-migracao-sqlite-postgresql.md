@@ -161,3 +161,40 @@ regras. A migração é aceita só se todos os itens abaixo forem verdadeiros no
 | 5 | SQL continua contido na camada de dados | `grep -rnE '\b(SELECT\|INSERT\|UPDATE\|DELETE)\b' src/ \| grep -v -e '^src/repositorio.js' -e '^src/db.js'` sem saída (vira passo do CI) |
 | 6 | O CI roda contra PostgreSQL e a aplicação sobe | Bloco `services: postgres` e `DATABASE_URL` descomentados em `ci.yml`. Os passos `npm test` e `curl --fail http://localhost:3000/api/saude` ficam verdes no PR |
 | 7 | O schema é criado do zero e a migração é idempotente | `docker compose down -v && docker compose up -d && npm run db:migrar && npm run db:migrar`: as duas execuções terminam com `schema criado` e sem erro |
+
+## Revisão — 2026-10-22
+
+**O que mudou.** O piloto já tinha doações reais. Uma pessoa da equipe da Marta rodou os testes
+na máquina do piloto com a configuração apontando para o banco real, e o `limparBanco()` apagou
+todas as doações. A Marta pediu que isso não possa acontecer de novo. A história 4b resolveu o
+caso no SQLite, e a decisão está no [ADR 0002](0002-testes-so-no-banco-de-teste.md): sob o
+Vitest o banco é sempre o de teste, e `limparBanco()` recusa apagar outro banco.
+
+**Por que a decisão continua.** Migrar para PostgreSQL 16 em contêiner continua valendo. O
+incidente não muda nenhum motivo da migração (restrição do caso, concorrência real na RN-02,
+`timestamptz`), e confirma um dos motivos para descartar a Alternativa 4: um banco compartilhado
+fica exposto à limpeza dos testes. As seções acima não foram alteradas. O que muda é **como os
+testes acham o banco** depois da migração:
+
+- **Banco de teste próprio e fixo.** O contêiner cria também o banco `pratocheio_teste`. Sob o
+  Vitest, `db.js` conecta sempre nele e ignora `DATABASE_URL`, como hoje ignora `DATABASE_FILE`.
+  No CI, o bloco `services: postgres` passa a criar `pratocheio_teste`.
+- **Limpeza que confere o banco.** No PostgreSQL não existe `:memory:`. `limparBanco()` passa a
+  consultar `SELECT current_database()` e lança erro se o nome não for `pratocheio_teste`.
+- **Item 2 do critério de validação.** O comando "depois" passa a ser
+  `docker compose up -d && npm test`, sem `DATABASE_URL`, porque a variável não troca mais o
+  banco dos testes. A contagem de referência não é mais 8: hoje são 21 testes (19 em
+  `tests/doacoes.test.js` e 2 em `tests/protecao-banco.test.js`), mais o do CA-05.
+- **Item 3 do critério de validação.** `tests/protecao-banco.test.js` é a única exceção ao "testes
+  não alterados": ele testa o próprio mecanismo do banco (`:memory:`, `DATABASE_FILE`) e será
+  reescrito para o PostgreSQL com os mesmos dois cenários Dado/Quando/Então. Todos os outros
+  arquivos de `tests/` continuam sem diff.
+- **Riscos.** Quem não consegue rodar Docker e usa um PostgreSQL instalado (Alternativa 2)
+  precisa criar `pratocheio_teste` nele. A demo num banco gerenciado (Alternativa 4) continua
+  possível só para a aplicação, trocando `DATABASE_URL`: a suíte nunca roda contra ele.
+
+**Quem paga.** O grupo, na migração da U3: um script de criação do segundo banco no
+`docker-compose.yml` e no CI, a consulta a `current_database()` em `limparBanco()` e a reescrita
+de `tests/protecao-banco.test.js`.
+
+Rastreabilidade da revisão: mudança de contexto (etapa 4), RNF-04, CV-08 e ADR 0002.

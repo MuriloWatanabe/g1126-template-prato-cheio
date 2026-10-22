@@ -138,3 +138,166 @@ describe('aceitar uma doação', () => {
     expect(res.body.erro).toMatch(/não encontrada/);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Fatia 2 (docs/analise.md) — a ONG filtra as disponíveis por tipo e vê a validade.
+// ---------------------------------------------------------------------------
+
+describe('filtrar disponíveis por tipo', () => {
+  // Dado doações de pão, arroz e pão de forma disponíveis
+  // Quando a ONG filtra por "pão"
+  // Então vê só as de pão, com a validade, da mais antiga para a mais recente
+  it('mostra só as doações do tipo filtrado, com validade', async () => {
+    const pao = await publicar({ tipo: 'Pão francês', quantidade: '5 kg', validade: '2026-12-01' });
+    await publicar({ tipo: 'Arroz', quantidade: '10 kg', validade: '2026-12-02' });
+    const forma = await publicar({ tipo: 'pão de forma', quantidade: '3 pacotes', validade: '2026-12-03' });
+
+    const res = await request(app).get('/api/doacoes').query({ tipo: 'pão' });
+    expect(res.status).toBe(200);
+    expect(res.body.map((d) => d.id)).toEqual([pao.body.id, forma.body.id]);
+    expect(res.body[0].validade).toBe('2026-12-01');
+  });
+
+  // Dado uma doação de pão já aceita pela ONG A
+  // Quando a ONG B filtra por "pão"
+  // Então a doação aceita não aparece (RN-02 continua valendo com filtro)
+  it('não mostra doação aceita mesmo quando o tipo bate', async () => {
+    const { body: criada } = await publicar();
+    await request(app).post(`/api/doacoes/${criada.id}/aceitar`).send({ ong: 'ONG A' });
+
+    const res = await request(app).get('/api/doacoes').query({ tipo: 'pão' });
+    expect(res.body).toHaveLength(0);
+  });
+
+  // Dado doações disponíveis
+  // Quando a ONG filtra por um tipo que ninguém doou
+  // Então recebe lista vazia, sem erro
+  it('devolve lista vazia quando nenhum tipo bate', async () => {
+    await publicar();
+    const res = await request(app).get('/api/doacoes').query({ tipo: 'feijão' });
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// História — o doador vê a situação das próprias doações
+// (disponível ou aceita, e por qual ONG).
+// ---------------------------------------------------------------------------
+
+describe('doador acompanha as próprias doações', () => {
+  // Dado que a Padaria Central publicou duas doações e a ONG A aceitou uma
+  // Quando a Padaria Central consulta as próprias doações
+  // Então vê uma disponível e outra aceita pela ONG A, com o horário do aceite
+  it('mostra a situação de cada doação e qual ONG aceitou', async () => {
+    const { body: pao } = await publicar({ ...doacaoValida, doador: 'Padaria Central' });
+    const { body: sopa } = await publicar({
+      tipo: 'Sopa', quantidade: '3 kg', validade: '2026-12-01', doador: 'Padaria Central'
+    });
+    await request(app).post(`/api/doacoes/${sopa.id}/aceitar`).send({ ong: 'ONG A' });
+
+    const res = await request(app).get('/api/doadores/Padaria Central/doacoes');
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(2);
+
+    const [primeira, segunda] = res.body;
+    expect(primeira).toMatchObject({ id: pao.id, status: 'disponivel', ong: null });
+    expect(segunda).toMatchObject({ id: sopa.id, status: 'aceita', ong: 'ONG A' });
+    expect(segunda.aceita_em).toBeTruthy();
+  });
+
+  // Dado doações publicadas por dois doadores
+  // Quando a Padaria Central consulta as próprias doações
+  // Então não vê as doações do Mercado Bom Preço
+  it('não mostra doações de outro doador', async () => {
+    await publicar({ ...doacaoValida, doador: 'Padaria Central' });
+    await publicar({ ...doacaoValida, doador: 'Mercado Bom Preço' });
+
+    const res = await request(app).get('/api/doadores/Padaria Central/doacoes');
+    expect(res.body).toHaveLength(1);
+  });
+
+  // Dado um doador que nunca publicou
+  // Quando consulta as próprias doações
+  // Então recebe lista vazia
+  it('devolve lista vazia para doador sem doações', async () => {
+    const res = await request(app).get('/api/doadores/Ninguem/doacoes');
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// História — o doador cancela uma doação ainda disponível.
+// ---------------------------------------------------------------------------
+
+describe('doador cancela uma doação disponível', () => {
+  const daPadaria = { ...doacaoValida, doador: 'Padaria Central' };
+
+  function cancelar(id, doador) {
+    return request(app).post(`/api/doacoes/${id}/cancelar`).send({ doador });
+  }
+
+  // Dado uma doação disponível publicada pela Padaria Central
+  // Quando a Padaria Central cancela
+  // Então a doação fica cancelada e sai da lista das ONGs
+  it('cancela a doação e a retira da lista de disponíveis', async () => {
+    const { body: criada } = await publicar(daPadaria);
+
+    const res = await cancelar(criada.id, 'Padaria Central');
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe('cancelada');
+    expect(res.body.cancelada_em).toBeTruthy();
+
+    const lista = await request(app).get('/api/doacoes');
+    expect(lista.body).toHaveLength(0);
+  });
+
+  // Dado uma doação já aceita pela ONG A
+  // Quando o doador tenta cancelar
+  // Então recebe erro e o aceite da ONG A permanece intacto
+  it('recusa cancelar uma doação já aceita', async () => {
+    const { body: criada } = await publicar(daPadaria);
+    await request(app).post(`/api/doacoes/${criada.id}/aceitar`).send({ ong: 'ONG A' });
+
+    const res = await cancelar(criada.id, 'Padaria Central');
+    expect(res.status).toBe(400);
+    expect(res.body.erro).toMatch(/já foi aceita/);
+
+    const minhas = await request(app).get('/api/doadores/Padaria Central/doacoes');
+    expect(minhas.body[0]).toMatchObject({ status: 'aceita', ong: 'ONG A' });
+  });
+
+  // Dado uma doação disponível da Padaria Central
+  // Quando outro doador tenta cancelar
+  // Então recebe erro e a doação continua disponível
+  it('recusa cancelamento por quem não publicou a doação', async () => {
+    const { body: criada } = await publicar(daPadaria);
+
+    const res = await cancelar(criada.id, 'Mercado Bom Preço');
+    expect(res.status).toBe(400);
+    expect(res.body.erro).toMatch(/só quem publicou/);
+
+    const lista = await request(app).get('/api/doacoes');
+    expect(lista.body).toHaveLength(1);
+  });
+
+  // Dado uma doação cancelada pelo doador
+  // Quando uma ONG com a tela antiga aberta tenta aceitar
+  // Então recebe erro dizendo que a doação foi cancelada
+  it('recusa aceitar uma doação cancelada', async () => {
+    const { body: criada } = await publicar(daPadaria);
+    await cancelar(criada.id, 'Padaria Central');
+
+    const res = await request(app).post(`/api/doacoes/${criada.id}/aceitar`).send({ ong: 'ONG A' });
+    expect(res.status).toBe(400);
+    expect(res.body.erro).toMatch(/cancelada/);
+  });
+
+  // Caminho proibido — doação inexistente
+  it('recusa cancelar uma doação que não existe', async () => {
+    const res = await cancelar(999, 'Padaria Central');
+    expect(res.status).toBe(400);
+    expect(res.body.erro).toMatch(/não encontrada/);
+  });
+});

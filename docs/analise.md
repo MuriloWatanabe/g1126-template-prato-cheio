@@ -334,3 +334,6 @@ Nível *colaboradora*: a IA gerou candidatas, o grupo corrigiu e responde pelo r
 - **Regra inventada silenciosamente** — o relatório por bairro pressupunha campo de bairro estruturado, ausente no caso. Virou spike, com a Marta ratificando.
 - **Falso fatiamento** — a IA propôs "filtro no backend e depois a tela"; nada executa sozinho. Refatiamos pelo método hambúrguer.
 - **Código do skeleton** — o aceite exclusivo foi escrito com apoio de IA e revisado pelo grupo; garantir a exclusividade em um único `UPDATE ... WHERE status = 'disponivel'`, em vez de ler e depois escrever, é decisão que o grupo defende. Cada PR registra o que foi gerado e o que alteramos.
+- **Requisitos não-funcionais** — a IA ajudou na decisão de melhores métricas e valores de aceite.
+- **ADRs** — IA atuou como assistente na formatação e escrita do ADR ajudando a detalhar a decisão de forma mais consistente ao formato do documento.
+- **Diagramas** — a IA consistentemente falhou no auxílio da montagem do diagramas, gerando exemplos e versões iniciais não condizentes com o que era pedido. Foi o erro mais destacado dela na segunda entrega, visto que os diagramas tiveram que ser refeitos com pouco auxílio dela.
