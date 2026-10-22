@@ -62,15 +62,20 @@ export async function migrar() {
       validade    TEXT NOT NULL,
       status      TEXT NOT NULL DEFAULT 'disponivel',
       ong         TEXT,
+      doador      TEXT,
       criada_em   TEXT NOT NULL DEFAULT (datetime('now'))
     )
   `);
 
-  // A história zero grava o horário do aceite (CA-02). Adicionada aqui de forma
-  // idempotente para não quebrar bancos criados antes desta coluna existir.
+  // Colunas acrescentadas depois da primeira versão do schema, de forma
+  // idempotente para não quebrar bancos criados antes delas existirem:
+  // - aceita_em: a história zero grava o horário do aceite (CA-02);
+  // - doador: o doador vê a situação das próprias doações.
   const colunas = conexao().prepare('PRAGMA table_info(doacoes)').all();
-  if (!colunas.some((c) => c.name === 'aceita_em')) {
-    conexao().exec('ALTER TABLE doacoes ADD COLUMN aceita_em TEXT');
+  for (const nova of ['aceita_em', 'doador']) {
+    if (!colunas.some((c) => c.name === nova)) {
+      conexao().exec(`ALTER TABLE doacoes ADD COLUMN ${nova} TEXT`);
+    }
   }
 }
 

@@ -4,16 +4,19 @@ import * as repo from './repositorio.js';
 
 // História zero — "um doador publica uma doação".
 // Critério: tipo, quantidade e validade são obrigatórios.
-export async function criarDoacao({ tipo, quantidade, validade }) {
+// O nome do doador é opcional (não há login, ver "Fora da fatia" na Análise);
+// quando informado, permite ao doador acompanhar as próprias doações.
+export async function criarDoacao({ tipo, quantidade, validade, doador }) {
   const t = typeof tipo === 'string' ? tipo.trim() : '';
   const q = typeof quantidade === 'string' ? quantidade.trim() : '';
   const v = typeof validade === 'string' ? validade.trim() : '';
+  const d = typeof doador === 'string' && doador.trim() ? doador.trim() : null;
 
   if (!t || !q || !v) {
     throw new Error('tipo, quantidade e validade são obrigatórios');
   }
 
-  return await repo.inserir({ tipo: t, quantidade: q, validade: v });
+  return await repo.inserir({ tipo: t, quantidade: q, validade: v, doador: d });
 }
 
 // História zero — "uma ONG vê as doações disponíveis".
@@ -22,6 +25,18 @@ export async function criarDoacao({ tipo, quantidade, validade }) {
 export async function listarDisponiveis({ tipo } = {}) {
   const t = typeof tipo === 'string' ? tipo.trim() : '';
   return await repo.listarDisponiveis({ tipo: t || undefined });
+}
+
+// História — "o doador vê a situação das próprias doações"
+// (disponível ou aceita, e por qual ONG).
+export async function listarDoDoador(doador) {
+  const d = typeof doador === 'string' ? doador.trim() : '';
+  if (!d) throw new Error('informe o doador');
+
+  const doacoes = await repo.listarDoDoador(d);
+  return doacoes.map(({ id, tipo, quantidade, validade, status, ong, criada_em, aceita_em }) => ({
+    id, tipo, quantidade, validade, status, ong, criada_em, aceita_em
+  }));
 }
 
 // História zero — "uma ONG aceita uma doação".

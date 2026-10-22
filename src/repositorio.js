@@ -6,13 +6,13 @@
 //   const { rows } = await query('SELECT * FROM doacoes WHERE id = ?', [id]);
 import { query } from './db.js';
 
-export async function inserir({ tipo, quantidade, validade }) {
+export async function inserir({ tipo, quantidade, validade, doador = null }) {
   const sql = `
-    INSERT INTO doacoes (tipo, quantidade, validade)
-    VALUES (?, ?, ?)
+    INSERT INTO doacoes (tipo, quantidade, validade, doador)
+    VALUES (?, ?, ?, ?)
     RETURNING *
   `;
-  const { rows } = await query(sql, [tipo, quantidade, validade]);
+  const { rows } = await query(sql, [tipo, quantidade, validade, doador]);
   return rows[0];
 }
 
@@ -32,6 +32,18 @@ export async function listarDisponiveis({ tipo } = {}) {
     ORDER BY criada_em ASC, id ASC
   `;
   const { rows } = await query(sql, valores);
+  return rows;
+}
+
+/** Todas as doações de um doador, em qualquer status, da mais antiga para a mais recente. */
+export async function listarDoDoador(doador) {
+  const sql = `
+    SELECT *
+    FROM doacoes
+    WHERE doador = ?
+    ORDER BY criada_em ASC, id ASC
+  `;
+  const { rows } = await query(sql, [doador]);
   return rows;
 }
 

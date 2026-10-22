@@ -179,3 +179,50 @@ describe('filtrar disponíveis por tipo', () => {
     expect(res.body).toEqual([]);
   });
 });
+
+// ---------------------------------------------------------------------------
+// História — o doador vê a situação das próprias doações
+// (disponível ou aceita, e por qual ONG).
+// ---------------------------------------------------------------------------
+
+describe('doador acompanha as próprias doações', () => {
+  // Dado que a Padaria Central publicou duas doações e a ONG A aceitou uma
+  // Quando a Padaria Central consulta as próprias doações
+  // Então vê uma disponível e outra aceita pela ONG A, com o horário do aceite
+  it('mostra a situação de cada doação e qual ONG aceitou', async () => {
+    const { body: pao } = await publicar({ ...doacaoValida, doador: 'Padaria Central' });
+    const { body: sopa } = await publicar({
+      tipo: 'Sopa', quantidade: '3 kg', validade: '2026-12-01', doador: 'Padaria Central'
+    });
+    await request(app).post(`/api/doacoes/${sopa.id}/aceitar`).send({ ong: 'ONG A' });
+
+    const res = await request(app).get('/api/doadores/Padaria Central/doacoes');
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(2);
+
+    const [primeira, segunda] = res.body;
+    expect(primeira).toMatchObject({ id: pao.id, status: 'disponivel', ong: null });
+    expect(segunda).toMatchObject({ id: sopa.id, status: 'aceita', ong: 'ONG A' });
+    expect(segunda.aceita_em).toBeTruthy();
+  });
+
+  // Dado doações publicadas por dois doadores
+  // Quando a Padaria Central consulta as próprias doações
+  // Então não vê as doações do Mercado Bom Preço
+  it('não mostra doações de outro doador', async () => {
+    await publicar({ ...doacaoValida, doador: 'Padaria Central' });
+    await publicar({ ...doacaoValida, doador: 'Mercado Bom Preço' });
+
+    const res = await request(app).get('/api/doadores/Padaria Central/doacoes');
+    expect(res.body).toHaveLength(1);
+  });
+
+  // Dado um doador que nunca publicou
+  // Quando consulta as próprias doações
+  // Então recebe lista vazia
+  it('devolve lista vazia para doador sem doações', async () => {
+    const res = await request(app).get('/api/doadores/Ninguem/doacoes');
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual([]);
+  });
+});

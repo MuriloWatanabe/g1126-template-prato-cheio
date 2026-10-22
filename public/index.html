@@ -23,6 +23,8 @@
 
   <fieldset>
     <legend>Publicar doação</legend>
+    <label for="doador">Seu nome (doador)</label>
+    <input id="doador" placeholder="Ex.: Padaria Central">
     <label for="tipo">Tipo de alimento</label>
     <input id="tipo" placeholder="Ex.: sopa, pão, frutas">
     <label for="quantidade">Quantidade</label>
@@ -31,6 +33,10 @@
     <input id="validade" type="date">
     <button id="publicar">Publicar</button>
   </fieldset>
+
+  <h2>Minhas doações</h2>
+  <p>Informe seu nome no formulário acima para acompanhar suas doações.</p>
+  <ul id="minhas"></ul>
 
   <h2>Doações disponíveis</h2>
   <label for="filtro-tipo">Filtrar por tipo</label>
@@ -75,9 +81,33 @@
         li.appendChild(botao);
         lista.appendChild(li);
       }
+      carregarMinhas();
+    }
+
+    const SITUACAO = { disponivel: 'disponível', aceita: 'aceita' };
+
+    async function carregarMinhas() {
+      const doador = document.getElementById('doador').value.trim();
+      const minhas = document.getElementById('minhas');
+      minhas.innerHTML = '';
+      if (!doador) return;
+      const res = await fetch(`/api/doadores/${encodeURIComponent(doador)}/doacoes`);
+      const doacoes = await res.json();
+      if (!doacoes.length) {
+        minhas.innerHTML = '<li>Você ainda não publicou doações.</li>';
+        return;
+      }
+      for (const d of doacoes) {
+        const li = document.createElement('li');
+        const situacao = SITUACAO[d.status] ?? d.status;
+        li.textContent = `${d.tipo} — ${d.quantidade}: ${situacao}`
+          + (d.ong ? ` por ${d.ong} em ${d.aceita_em}` : '');
+        minhas.appendChild(li);
+      }
     }
 
     document.getElementById('filtro-tipo').oninput = carregar;
+    document.getElementById('doador').onchange = carregarMinhas;
 
     document.getElementById('publicar').onclick = async () => {
       await fetch('/api/doacoes', {
@@ -86,7 +116,8 @@
         body: JSON.stringify({
           tipo: document.getElementById('tipo').value,
           quantidade: document.getElementById('quantidade').value,
-          validade: document.getElementById('validade').value
+          validade: document.getElementById('validade').value,
+          doador: document.getElementById('doador').value
         })
       });
       carregar();
