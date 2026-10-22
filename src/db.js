@@ -70,9 +70,10 @@ export async function migrar() {
   // Colunas acrescentadas depois da primeira versão do schema, de forma
   // idempotente para não quebrar bancos criados antes delas existirem:
   // - aceita_em: a história zero grava o horário do aceite (CA-02);
-  // - doador: o doador vê a situação das próprias doações.
+  // - doador: o doador vê a situação das próprias doações;
+  // - cancelada_em: o doador cancela uma doação ainda disponível.
   const colunas = conexao().prepare('PRAGMA table_info(doacoes)').all();
-  for (const nova of ['aceita_em', 'doador']) {
+  for (const nova of ['aceita_em', 'doador', 'cancelada_em']) {
     if (!colunas.some((c) => c.name === nova)) {
       conexao().exec(`ALTER TABLE doacoes ADD COLUMN ${nova} TEXT`);
     }

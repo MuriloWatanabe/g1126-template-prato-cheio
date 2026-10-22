@@ -226,3 +226,78 @@ describe('doador acompanha as próprias doações', () => {
     expect(res.body).toEqual([]);
   });
 });
+
+// ---------------------------------------------------------------------------
+// História — o doador cancela uma doação ainda disponível.
+// ---------------------------------------------------------------------------
+
+describe('doador cancela uma doação disponível', () => {
+  const daPadaria = { ...doacaoValida, doador: 'Padaria Central' };
+
+  function cancelar(id, doador) {
+    return request(app).post(`/api/doacoes/${id}/cancelar`).send({ doador });
+  }
+
+  // Dado uma doação disponível publicada pela Padaria Central
+  // Quando a Padaria Central cancela
+  // Então a doação fica cancelada e sai da lista das ONGs
+  it('cancela a doação e a retira da lista de disponíveis', async () => {
+    const { body: criada } = await publicar(daPadaria);
+
+    const res = await cancelar(criada.id, 'Padaria Central');
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe('cancelada');
+    expect(res.body.cancelada_em).toBeTruthy();
+
+    const lista = await request(app).get('/api/doacoes');
+    expect(lista.body).toHaveLength(0);
+  });
+
+  // Dado uma doação já aceita pela ONG A
+  // Quando o doador tenta cancelar
+  // Então recebe erro e o aceite da ONG A permanece intacto
+  it('recusa cancelar uma doação já aceita', async () => {
+    const { body: criada } = await publicar(daPadaria);
+    await request(app).post(`/api/doacoes/${criada.id}/aceitar`).send({ ong: 'ONG A' });
+
+    const res = await cancelar(criada.id, 'Padaria Central');
+    expect(res.status).toBe(400);
+    expect(res.body.erro).toMatch(/já foi aceita/);
+
+    const minhas = await request(app).get('/api/doadores/Padaria Central/doacoes');
+    expect(minhas.body[0]).toMatchObject({ status: 'aceita', ong: 'ONG A' });
+  });
+
+  // Dado uma doação disponível da Padaria Central
+  // Quando outro doador tenta cancelar
+  // Então recebe erro e a doação continua disponível
+  it('recusa cancelamento por quem não publicou a doação', async () => {
+    const { body: criada } = await publicar(daPadaria);
+
+    const res = await cancelar(criada.id, 'Mercado Bom Preço');
+    expect(res.status).toBe(400);
+    expect(res.body.erro).toMatch(/só quem publicou/);
+
+    const lista = await request(app).get('/api/doacoes');
+    expect(lista.body).toHaveLength(1);
+  });
+
+  // Dado uma doação cancelada pelo doador
+  // Quando uma ONG com a tela antiga aberta tenta aceitar
+  // Então recebe erro dizendo que a doação foi cancelada
+  it('recusa aceitar uma doação cancelada', async () => {
+    const { body: criada } = await publicar(daPadaria);
+    await cancelar(criada.id, 'Padaria Central');
+
+    const res = await request(app).post(`/api/doacoes/${criada.id}/aceitar`).send({ ong: 'ONG A' });
+    expect(res.status).toBe(400);
+    expect(res.body.erro).toMatch(/cancelada/);
+  });
+
+  // Caminho proibido — doação inexistente
+  it('recusa cancelar uma doação que não existe', async () => {
+    const res = await cancelar(999, 'Padaria Central');
+    expect(res.status).toBe(400);
+    expect(res.body.erro).toMatch(/não encontrada/);
+  });
+});

@@ -84,7 +84,7 @@
       carregarMinhas();
     }
 
-    const SITUACAO = { disponivel: 'disponível', aceita: 'aceita' };
+    const SITUACAO = { disponivel: 'disponível', aceita: 'aceita', cancelada: 'cancelada' };
 
     async function carregarMinhas() {
       const doador = document.getElementById('doador').value.trim();
@@ -101,7 +101,22 @@
         const li = document.createElement('li');
         const situacao = SITUACAO[d.status] ?? d.status;
         li.textContent = `${d.tipo} — ${d.quantidade}: ${situacao}`
-          + (d.ong ? ` por ${d.ong} em ${d.aceita_em}` : '');
+          + (d.ong ? ` por ${d.ong} em ${d.aceita_em}` : '') + ' ';
+        if (d.status === 'disponivel') {
+          const botao = document.createElement('button');
+          botao.textContent = 'Cancelar';
+          botao.onclick = async () => {
+            const res = await fetch(`/api/doacoes/${d.id}/cancelar`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ doador })
+            });
+            const resultado = await res.json();
+            mostrarMensagem(res.ok ? 'Doação cancelada.' : resultado.erro, res.ok ? 'sucesso' : 'erro');
+            carregar();
+          };
+          li.appendChild(botao);
+        }
         minhas.appendChild(li);
       }
     }

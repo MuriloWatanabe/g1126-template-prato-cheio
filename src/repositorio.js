@@ -74,3 +74,22 @@ export async function aceitar(id, ong) {
   const { rows } = await query(sql, [ong, id]);
   return rows[0];
 }
+
+/**
+ * Marca a doação como cancelada pelo próprio doador e devolve a linha atualizada.
+ *
+ * Mesmo padrão do aceite: as condições (é do doador e ainda está disponível)
+ * ficam DENTRO do UPDATE. Se uma ONG aceitar no mesmo instante, só um dos dois
+ * comandos encontra a linha disponível — nunca há doação aceita e cancelada.
+ */
+export async function cancelar(id, doador) {
+  const sql = `
+    UPDATE doacoes
+       SET status       = 'cancelada',
+           cancelada_em = datetime('now')
+     WHERE id = ? AND doador = ? AND status = 'disponivel'
+    RETURNING *
+  `;
+  const { rows } = await query(sql, [id, doador]);
+  return rows[0];
+}

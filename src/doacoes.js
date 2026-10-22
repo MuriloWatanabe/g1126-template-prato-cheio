@@ -34,18 +34,23 @@ export async function listarDoDoador(doador) {
   if (!d) throw new Error('informe o doador');
 
   const doacoes = await repo.listarDoDoador(d);
-  return doacoes.map(({ id, tipo, quantidade, validade, status, ong, criada_em, aceita_em }) => ({
-    id, tipo, quantidade, validade, status, ong, criada_em, aceita_em
+  return doacoes.map(({ id, tipo, quantidade, validade, status, ong, criada_em, aceita_em, cancelada_em }) => ({
+    id, tipo, quantidade, validade, status, ong, criada_em, aceita_em, cancelada_em
   }));
+}
+
+function validarId(id) {
+  const identificador = Number(id);
+  if (!Number.isInteger(identificador) || identificador <= 0) {
+    throw new Error('identificador de doação inválido');
+  }
+  return identificador;
 }
 
 // História zero — "uma ONG aceita uma doação".
 // RN-02: uma doação aceita não fica disponível para outra ONG.
 export async function aceitar(id, ong) {
-  const identificador = Number(id);
-  if (!Number.isInteger(identificador) || identificador <= 0) {
-    throw new Error('identificador de doação inválido');
-  }
+  const identificador = validarId(id);
 
   const nomeOng = typeof ong === 'string' && ong.trim() ? ong.trim() : 'ONG';
 
@@ -55,5 +60,27 @@ export async function aceitar(id, ong) {
   // Não atualizou: ou a doação não existe, ou já estava aceita (RN-02).
   const existente = await repo.buscarPorId(identificador);
   if (!existente) throw new Error('doação não encontrada');
+  if (existente.status === 'cancelada') throw new Error('esta doação foi cancelada pelo doador');
   throw new Error('esta doação já foi aceita por outra ONG');
+}
+
+// História — "o doador cancela uma doação ainda disponível".
+// Só quem publicou cancela, e só enquanto nenhuma ONG aceitou: depois do
+// aceite a ONG já pode estar a caminho (RN-02 garante a reserva para ela).
+export async function cancelar(id, doador) {
+  const identificador = validarId(id);
+  const d = typeof doador === 'string' ? doador.trim() : '';
+  if (!d) throw new Error('informe o doador');
+
+  const cancelada = await repo.cancelar(identificador, d);
+  if (cancelada) return cancelada;
+
+  // Não atualizou: descobre o motivo para dar a mensagem certa.
+  const existente = await repo.buscarPorId(identificador);
+  if (!existente) throw new Error('doação não encontrada');
+  if (existente.doador !== d) throw new Error('só quem publicou a doação pode cancelá-la');
+  if (existente.status === 'aceita') {
+    throw new Error('esta doação já foi aceita por uma ONG e não pode ser cancelada');
+  }
+  throw new Error('esta doação já foi cancelada');
 }
