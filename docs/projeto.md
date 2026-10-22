@@ -5,6 +5,7 @@
 ## Decisões de projeto
 | # | Decisão | Alternativas | Requisito/risco da Análise que a motiva |
 |---|---|---|---|
+| 4 | Identificar o doador pelo nome informado na publicação (coluna `doador`, opcional), sem login. As histórias "doador vê as próprias doações" e "doador cancela doação disponível" usam esse nome; o cancelamento só vale para quem publicou e só enquanto a doação está `disponivel`, com a condição dentro do `UPDATE`, como no aceite. | (a) nome livre na publicação, sem login — escolhida: não interpõe identidade entre a ação e o dado medido; (b) cadastro e login do doador — identidade forte, mas abre o cadastro de perfis e atrasa o núcleo transacional. | *Fora da fatia* da Análise (login e cadastro de perfis); RN-02 (o cancelamento não pode competir com o aceite). Custo: quem souber o nome de um doador vê e cancela as doações dele; revisitar quando houver login. |
 
 ## Tabela de trade-offs (uma decisão em detalhe)
 | Critério | Alternativa A | Alternativa B |
