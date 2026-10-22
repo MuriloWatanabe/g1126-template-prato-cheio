@@ -28,12 +28,22 @@ migração da U3. O custo aceito é reescrever o aceite como transação se ele 
 uma tabela.
 
 ## Diagramas
-(contexto + dados ou componentes — em `docs/` ou como imagem)
+- [Contexto](diagramas/contexto.md): retrato do código no commit `64a4dde`; Marta, vigilância sanitária e voluntário aparecem com setas tracejadas, porque ainda não têm rota.
+- [Dados](diagramas/dados.md): proposta. Já inclui o `doador`, o status `cancelada` e o `cancelada_em` das histórias da etapa 6.
+
+Divergências entre o diagrama de dados e o `src/db.js`:
+
+| # | Diagrama de dados | `src/db.js` hoje | Por que ainda não mudou |
+|---|---|---|---|
+| 1 | ONG e doador são tabelas (`ONGS`, `DOADORES`), ligadas à doação por FK | `ong` e `doador` são colunas `TEXT` com o nome digitado | Decisão 4: sem cadastro nem login nesta unidade. Custo: "Padaria X" e "padaria x" viram dois doadores |
+| 2 | Voluntário e coleta: tabela `VOLUNTARIOS`, `id_voluntario`, `coletada_em` e os status `coletada` e `perdida` | Não existem | A história de coleta (RN-03, decisão 2) ainda não foi feita |
+| 3 | Tipos e restrições: `quantidade` numérica > 0 com `unidade`, `validade` como data, `status` com `CHECK` e horários em UTC | `quantidade` e `validade` são `TEXT` livre ("10 kg"), `status` sem `CHECK`, horários por `datetime('now')`, sem fuso | Ficam para a migração do [ADR 0001](adr/0001-migracao-sqlite-postgresql.md) (`timestamptz`) e para o RNF-03 |
 
 ## ADRs
 Ver `docs/adr/`.
 
 - [ADR 0001 — Migração do banco de SQLite para PostgreSQL (em contêiner)](adr/0001-migracao-sqlite-postgresql.md): aceito, 2026-10-09
+- [ADR 0002 — Os testes só limpam e alteram o banco de teste](adr/0002-testes-so-no-banco-de-teste.md): aceito, 2026-10-22
 
 ## Requisitos não-funcionais
 
