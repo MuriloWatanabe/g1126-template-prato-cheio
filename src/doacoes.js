@@ -34,8 +34,8 @@ export async function listarDoDoador(doador) {
   if (!d) throw new Error('informe o doador');
 
   const doacoes = await repo.listarDoDoador(d);
-  return doacoes.map(({ id, tipo, quantidade, validade, status, ong, criada_em, aceita_em, cancelada_em }) => ({
-    id, tipo, quantidade, validade, status, ong, criada_em, aceita_em, cancelada_em
+  return doacoes.map(({ id, tipo, quantidade, validade, status, ong, criada_em, aceita_em, cancelada_em, coletada_em }) => ({
+    id, tipo, quantidade, validade, status, ong, criada_em, aceita_em, cancelada_em, coletada_em
   }));
 }
 
@@ -79,8 +79,27 @@ export async function cancelar(id, doador) {
   const existente = await repo.buscarPorId(identificador);
   if (!existente) throw new Error('doação não encontrada');
   if (existente.doador !== d) throw new Error('só quem publicou a doação pode cancelá-la');
-  if (existente.status === 'aceita') {
-    throw new Error('esta doação já foi aceita por uma ONG e não pode ser cancelada');
-  }
-  throw new Error('esta doação já foi cancelada');
+  if (existente.status === 'cancelada') throw new Error('esta doação já foi cancelada');
+  throw new Error('esta doação já foi aceita por uma ONG e não pode ser cancelada');
+}
+
+// História — "o voluntário confirma a coleta pelo celular".
+export async function listarColetasPendentes() {
+  return await repo.listarColetasPendentes();
+}
+
+// Fatia 1 (CA-17): só doação aceita pode ser coletada, e o horário gravado é o
+// do servidor. O horário do toque e o reenvio ficam para as próximas fatias.
+export async function confirmarColeta(id) {
+  const identificador = validarId(id);
+
+  const coletada = await repo.coletar(identificador);
+  if (coletada) return coletada;
+
+  // Não atualizou: descobre o motivo para dar a mensagem certa.
+  const existente = await repo.buscarPorId(identificador);
+  if (!existente) throw new Error('doação não encontrada');
+  if (existente.status === 'coletada') throw new Error('a coleta desta doação já foi confirmada');
+  if (existente.status === 'cancelada') throw new Error('esta doação foi cancelada pelo doador');
+  throw new Error('esta doação ainda não foi aceita por uma ONG');
 }
