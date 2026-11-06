@@ -144,6 +144,17 @@ git push -u origin historia/ong-aceita-doacao
 Abra o Pull Request no GitHub, preencha o template, espere o **CI ficar verde** e
 peça a revisão de **outro integrante**. Só então faça o merge.
 
+## Definição de pronto
+
+Pronto, no nosso grupo, é:
+
+- [ ] CI verde no PR — onde se confere: aba "Checks" do Pull Request no GitHub (workflow de `.github/workflows/`)
+- [ ] Aprovado por um integrante que não é o autor — onde se confere: seção "Reviewers" do Pull Request, com a aprovação de alguém diferente de quem abriu o PR
+- [ ] Cada critério de aceite da história tem um teste de verdade, sem `it.todo` sobrando para ela — onde se confere: aba "Files changed" do PR, nos arquivos de `tests/`
+- [ ] O que foi gerado com IA e o que o grupo alterou está registrado — onde se confere: descrição do Pull Request (template preenchido)
+- [ ] A mudança entrou pela branch da história via PR, e não por commit direto na `main` — onde se confere: PR com status "Merged" e histórico de commits da `main`
+- [ ] Se a mudança altera como instalar, rodar ou testar, a seção "Como rodar" foi atualizada no mesmo PR — onde se confere: aba "Files changed" do PR, no `README.md`
+
 ## O que já está pronto e o que falta
 
 Pronto: estrutura do projeto, interface básica, rota de saúde, **conexão com o banco e o schema** (`src/db.js`), CI configurado e um teste passando (prova que a aplicação sobe).

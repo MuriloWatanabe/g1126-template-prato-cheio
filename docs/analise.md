@@ -1,6 +1,6 @@
 # Documento de Análise — Prato Cheio
 
-*Trabalho 1 · Unidade 1 · Gabriel Albani de Souza · Miguel Augusto Guedes · Guilherme Tamanini · Vinicius Henrique da Silva · Murilo Enzo Watanabe*
+*Trabalho 1 · Unidade 1 · Gabriel Albani de Souza · Miguel Augusto Guedes · Vinicius Henrique da Silva · Murilo Enzo Watanabe*
 
 ## 1. Problema central
 
@@ -87,6 +87,13 @@ Descartada: *"Como time, quero criar a tabela de doações"* — **é tarefa, n�
 - **CA-09** — **Dado** doação aceita pela ONG A há 5h59, sem coleta confirmada; **Quando** a ONG B abre a lista; **Então** não aparece e segue reservada para a ONG A.
 - **CA-10** — **Dado** o mesmo cenário com 6h01; **Quando** a ONG B abre a lista; **Então** aparece como disponível, a ONG A vê a reserva expirada e doador e ONG A recebem aviso.
 - **CA-11** — **Dado** reserva de 6h01 cuja validade já passou; **Quando** a ONG B abre a lista; **Então** não aparece e é exibida como perdida para o doador.
+
+**História — Voluntário confirma a coleta pelo celular** *(numeração segue em CA-17 porque a §11 já cita CA-12 a CA-16)*
+
+- **CA-17** — **Dado** uma doação aceita por uma ONG; **Quando** o voluntário confirma a coleta; **Então** ela fica coletada, com o horário da confirmação, e sai das coletas pendentes.
+- **CA-18 (RNF-01)** — **Dado** que o voluntário tocou em confirmar e a rede caiu por 30 s; **Quando** a confirmação chega ao servidor; **Então** o horário gravado difere do toque em até 1 s.
+- **CA-19 (RNF-01)** — **Dado** uma coleta já confirmada; **Quando** o celular reenvia a mesma confirmação; **Então** recebe sucesso e o horário original permanece.
+- **CA-20 (RNF-01)** — **Dado** a rede limitada a 400 kbps; **Quando** o voluntário faz 20 confirmações; **Então** 95% das respostas chegam em até 2 s.
 
 ## 8. Riscos
 

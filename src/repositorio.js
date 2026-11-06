@@ -93,3 +93,33 @@ export async function cancelar(id, doador) {
   const { rows } = await query(sql, [id, doador]);
   return rows[0];
 }
+
+/** Doações aceitas que aguardam a coleta, da aceita há mais tempo para a mais recente. */
+export async function listarColetasPendentes() {
+  const sql = `
+    SELECT *
+    FROM doacoes
+    WHERE status = 'aceita'
+    ORDER BY aceita_em ASC, id ASC
+  `;
+  const { rows } = await query(sql);
+  return rows;
+}
+
+/**
+ * Marca a doação como coletada e devolve a linha atualizada.
+ *
+ * Mesmo padrão do aceite: a condição `status = 'aceita'` fica DENTRO do UPDATE,
+ * então confirmações simultâneas não registram a coleta duas vezes.
+ */
+export async function coletar(id) {
+  const sql = `
+    UPDATE doacoes
+       SET status      = 'coletada',
+           coletada_em = datetime('now')
+     WHERE id = ? AND status = 'aceita'
+    RETURNING *
+  `;
+  const { rows } = await query(sql, [id]);
+  return rows[0];
+}

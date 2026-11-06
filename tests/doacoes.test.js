@@ -301,3 +301,130 @@ describe('doador cancela uma doação disponível', () => {
     expect(res.body.erro).toMatch(/não encontrada/);
   });
 });
+
+// ---------------------------------------------------------------------------
+// História — o voluntário confirma a coleta pelo celular.
+// Fatia 1 (CA-17): a confirmação registra a coleta com o horário do servidor.
+// ---------------------------------------------------------------------------
+
+describe('voluntário confirma a coleta', () => {
+  const daPadaria = { ...doacaoValida, doador: 'Padaria Central' };
+
+  async function publicarEAceitar() {
+    const { body: criada } = await publicar(daPadaria);
+    const { body: aceita } = await request(app)
+      .post(`/api/doacoes/${criada.id}/aceitar`)
+      .send({ ong: 'ONG A' });
+    return aceita;
+  }
+
+  function confirmarColeta(id) {
+    return request(app).post(`/api/doacoes/${id}/coletar`);
+  }
+
+  // CA-17 — Dado uma doação aceita por uma ONG
+  //         Quando o voluntário confirma a coleta
+  //         Então ela fica coletada, com o horário da confirmação, e sai das coletas pendentes
+  it('dado uma doação aceita por uma ONG, quando o voluntário confirma a coleta, então ela fica coletada, com o horário da confirmação, e sai das coletas pendentes', async () => {
+    const aceita = await publicarEAceitar();
+
+    const antes = await request(app).get('/api/coletas/pendentes');
+    expect(antes.status).toBe(200);
+    expect(antes.body.map((d) => d.id)).toEqual([aceita.id]);
+
+    const res = await confirmarColeta(aceita.id);
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe('coletada');
+    expect(res.body.coletada_em).toBeTruthy();
+    expect(res.body.coletada_em >= aceita.aceita_em).toBe(true);
+
+    const depois = await request(app).get('/api/coletas/pendentes');
+    expect(depois.body).toEqual([]);
+  });
+
+  // Dado uma doação disponível e outra aceita
+  // Quando o voluntário abre as coletas pendentes
+  // Então vê só a aceita, com a ONG que vai recebê-la
+  it('mostra nas coletas pendentes só as doações aceitas', async () => {
+    await publicar();
+    const aceita = await publicarEAceitar();
+
+    const res = await request(app).get('/api/coletas/pendentes');
+    expect(res.body).toHaveLength(1);
+    expect(res.body[0]).toMatchObject({ id: aceita.id, ong: 'ONG A', tipo: 'Pão francês' });
+  });
+
+  // Dado uma coleta confirmada
+  // Quando o doador consulta as próprias doações
+  // Então vê a doação como coletada, com o horário
+  it('mostra ao doador que a doação foi coletada e quando', async () => {
+    const aceita = await publicarEAceitar();
+    const { body: coletada } = await confirmarColeta(aceita.id);
+
+    const minhas = await request(app).get('/api/doadores/Padaria Central/doacoes');
+    expect(minhas.body[0]).toMatchObject({
+      status: 'coletada',
+      ong: 'ONG A',
+      coletada_em: coletada.coletada_em
+    });
+  });
+
+  // Dado uma doação que nenhuma ONG aceitou
+  // Quando o voluntário tenta confirmar a coleta
+  // Então recebe erro e a doação continua disponível
+  it('recusa confirmar a coleta de uma doação que nenhuma ONG aceitou', async () => {
+    const { body: criada } = await publicar();
+
+    const res = await confirmarColeta(criada.id);
+    expect(res.status).toBe(400);
+    expect(res.body.erro).toMatch(/ainda não foi aceita/);
+
+    const lista = await request(app).get('/api/doacoes');
+    expect(lista.body).toHaveLength(1);
+  });
+
+  // Dado uma coleta já confirmada
+  // Quando o voluntário confirma de novo
+  // Então recebe erro, sem alterar o registro (o reenvio idempotente é a fatia 3)
+  it('recusa confirmar duas vezes a mesma coleta', async () => {
+    const aceita = await publicarEAceitar();
+    await confirmarColeta(aceita.id);
+
+    const res = await confirmarColeta(aceita.id);
+    expect(res.status).toBe(400);
+    expect(res.body.erro).toMatch(/já foi confirmada/);
+  });
+
+  // Dado uma doação cancelada pelo doador
+  // Quando o voluntário tenta confirmar a coleta
+  // Então recebe erro dizendo que foi cancelada
+  it('recusa confirmar a coleta de uma doação cancelada', async () => {
+    const { body: criada } = await publicar(daPadaria);
+    await request(app).post(`/api/doacoes/${criada.id}/cancelar`).send({ doador: 'Padaria Central' });
+
+    const res = await confirmarColeta(criada.id);
+    expect(res.status).toBe(400);
+    expect(res.body.erro).toMatch(/cancelada/);
+  });
+
+  // Caminho proibido — doação inexistente
+  it('recusa confirmar a coleta de uma doação que não existe', async () => {
+    const res = await confirmarColeta(999);
+    expect(res.status).toBe(400);
+    expect(res.body.erro).toMatch(/não encontrada/);
+  });
+
+  // Dado uma doação já coletada
+  // Quando o doador tenta cancelar
+  // Então recebe o erro de doação aceita, não o de "já cancelada"
+  it('recusa cancelar uma doação já coletada', async () => {
+    const aceita = await publicarEAceitar();
+    await confirmarColeta(aceita.id);
+
+    const res = await request(app)
+      .post(`/api/doacoes/${aceita.id}/cancelar`)
+      .send({ doador: 'Padaria Central' });
+    expect(res.status).toBe(400);
+    expect(res.body.erro).toMatch(/já foi aceita/);
+  });
+});

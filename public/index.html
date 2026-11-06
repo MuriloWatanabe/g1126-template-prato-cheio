@@ -44,6 +44,9 @@
   <p id="mensagem"></p>
   <ul id="lista"></ul>
 
+  <h2>Coletas pendentes</h2>
+  <ul id="coletas"></ul>
+
   <script>
     function mostrarMensagem(texto, tipo) {
       const mensagem = document.getElementById('mensagem');
@@ -82,6 +85,34 @@
         lista.appendChild(li);
       }
       carregarMinhas();
+      carregarColetas();
+    }
+
+    async function carregarColetas() {
+      const res = await fetch('/api/coletas/pendentes');
+      const doacoes = await res.json();
+      const coletas = document.getElementById('coletas');
+      coletas.innerHTML = doacoes.length
+        ? ''
+        : '<li>Nenhuma coleta pendente.</li>';
+      for (const d of doacoes) {
+        const li = document.createElement('li');
+        li.textContent = `${d.tipo} — ${d.quantidade}, aceita por ${d.ong} `;
+        const botao = document.createElement('button');
+        botao.textContent = 'Confirmar coleta';
+        botao.onclick = async () => {
+          const res = await fetch(`/api/doacoes/${d.id}/coletar`, { method: 'POST' });
+          const resultado = await res.json();
+          if (res.ok) {
+            mostrarMensagem(`Coleta confirmada em ${resultado.coletada_em}.`, 'sucesso');
+          } else {
+            mostrarMensagem(resultado.erro, 'erro');
+          }
+          carregar();
+        };
+        li.appendChild(botao);
+        coletas.appendChild(li);
+      }
     }
 
     const SITUACAO = { disponivel: 'disponível', aceita: 'aceita', cancelada: 'cancelada' };
@@ -99,7 +130,9 @@
       }
       for (const d of doacoes) {
         const li = document.createElement('li');
-        const situacao = SITUACAO[d.status] ?? d.status;
+        const situacao = d.status === 'coletada'
+          ? `coletada em ${d.coletada_em}, aceita`
+          : SITUACAO[d.status] ?? d.status;
         li.textContent = `${d.tipo} — ${d.quantidade}: ${situacao}`
           + (d.ong ? ` por ${d.ong} em ${d.aceita_em}` : '') + ' ';
         if (d.status === 'disponivel') {

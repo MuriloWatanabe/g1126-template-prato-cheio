@@ -49,5 +49,21 @@ export function criarApp() {
     }
   });
 
+  app.get('/api/coletas/pendentes', async (req, res) => {
+    try {
+      res.json(await doacoes.listarColetasPendentes());
+    } catch (erro) {
+      res.status(400).json({ erro: erro.message });
+    }
+  });
+
+  app.post('/api/doacoes/:id/coletar', async (req, res) => {
+    try {
+      res.json(await doacoes.confirmarColeta(req.params.id));
+    } catch (erro) {
+      res.status(400).json({ erro: erro.message });
+    }
+  });
+
   return app;
 }
