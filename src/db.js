@@ -1,83 +1,66 @@
-// Conexão com o banco. Já vem pronto — não precisa mexer agora.
+// Conexão com o banco: PostgreSQL pelo driver `pg` (ADR 0001).
 //
-// UNIDADE 1: SQLite, embutido no Node (módulo `node:sqlite`) — nada para instalar.
-// UNIDADE 3: este arquivo será refatorado para PostgreSQL. A interface abaixo
-//            (`query` devolvendo `{ rows }`) foi desenhada para que a troca fique
-//            contida aqui, sem espalhar mudança pelo resto do código.
-// `node:sqlite` é módulo embutido do Node 22+. Carregado via createRequire porque
-// algumas ferramentas (como o Vite/Vitest) ainda não o reconhecem como embutido.
-import { createRequire } from 'node:module';
-const { DatabaseSync } = createRequire(import.meta.url)('node:sqlite');
+// A interface (`query` devolvendo `{ rows }`) é a mesma da época do SQLite,
+// então a troca de banco ficou contida aqui e em src/repositorio.js.
+import pg from 'pg';
 
-// Banco exclusivo dos testes: SQLite em memória, que nasce vazio e some ao fim
-// do processo. Nenhum dado real vive nele.
-export const BANCO_DE_TESTE = ':memory:';
+// Banco exclusivo dos testes, criado pelo docker-compose.yml e pelo CI.
+// Nenhum dado real vive nele.
+export const BANCO_DE_TESTE = 'pratocheio_teste';
+
+const SERVIDOR_LOCAL = 'postgres://pratocheio:pratocheio@localhost:5432';
 
 // Mudança de contexto (etapa 4, história 4b): os testes rodaram na máquina do
-// piloto com DATABASE_FILE apontando para o banco real e a limpeza apagou as
-// doações. Por isso, sob o Vitest, o banco é SEMPRE o de teste — nenhuma
-// configuração externa (variável de ambiente, .env, vitest.config) o troca.
-function escolherArquivo() {
-  if (process.env.VITEST) return BANCO_DE_TESTE;
-  return process.env.DATABASE_FILE || 'dados.sqlite';
+// piloto apontando para o banco real e a limpeza apagou as doações. Por isso,
+// sob o Vitest, o banco é SEMPRE o de teste — nenhuma configuração externa
+// (DATABASE_URL, .env, vitest.config) o troca.
+function escolherUrl() {
+  if (process.env.VITEST) return `${SERVIDOR_LOCAL}/${BANCO_DE_TESTE}`;
+  return process.env.DATABASE_URL || `${SERVIDOR_LOCAL}/pratocheio`;
 }
 
-let db;
-let arquivoEmUso;
+let pool;
 
-export function conexao() {
-  if (!db) {
-    arquivoEmUso = escolherArquivo();
-    db = new DatabaseSync(arquivoEmUso);
-  }
-  return db;
-}
-
-/** Arquivo do banco aberto pela conexão atual (':memory:' nos testes). */
-export function bancoEmUso() {
-  conexao();
-  return arquivoEmUso;
+function conexao() {
+  pool ??= new pg.Pool({ connectionString: escolherUrl() });
+  return pool;
 }
 
 /**
  * Executa uma consulta e devolve { rows }.
- * Use `?` como marcador de parâmetro (evita injeção de SQL):
- *   query('SELECT * FROM doacoes WHERE id = ?', [id])
+ * Use `$1`, `$2`… como marcadores de parâmetro (evita injeção de SQL):
+ *   query('SELECT * FROM doacoes WHERE id = $1', [id])
  */
 export async function query(sql, valores = []) {
-  const stmt = conexao().prepare(sql);
-  const ehLeitura = /^\s*(select|with)/i.test(sql) || /returning/i.test(sql);
-  if (ehLeitura) return { rows: stmt.all(...valores) };
-  const info = stmt.run(...valores);
-  return { rows: [], alteradas: info.changes };
+  const { rows } = await conexao().query(sql, valores);
+  return { rows };
 }
 
-/** Cria o schema, se ainda não existir. Rodado por `npm run db:migrar` e ao subir o servidor. */
+/** Nome do banco aberto pela conexão atual ('pratocheio_teste' nos testes). */
+export async function bancoEmUso() {
+  const { rows } = await query('SELECT current_database() AS nome');
+  return rows[0].nome;
+}
+
+/**
+ * Cria o schema, se ainda não existir. Rodado por `npm run db:migrar` e ao subir o servidor.
+ * Os horários são `timestamptz`: o instante fica gravado em UTC (RNF-03).
+ */
 export async function migrar() {
-  conexao().exec(`
+  await query(`
     CREATE TABLE IF NOT EXISTS doacoes (
-      id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      tipo        TEXT NOT NULL,
-      quantidade  TEXT NOT NULL,
-      validade    TEXT NOT NULL,
-      status      TEXT NOT NULL DEFAULT 'disponivel',
-      ong         TEXT,
-      doador      TEXT,
-      criada_em   TEXT NOT NULL DEFAULT (datetime('now'))
+      id            SERIAL PRIMARY KEY,
+      tipo          TEXT NOT NULL,
+      quantidade    TEXT NOT NULL,
+      validade      TEXT NOT NULL,
+      status        TEXT NOT NULL DEFAULT 'disponivel',
+      ong           TEXT,
+      doador        TEXT,
+      criada_em     TIMESTAMPTZ NOT NULL DEFAULT now(),
+      aceita_em     TIMESTAMPTZ,
+      cancelada_em  TIMESTAMPTZ
     )
   `);
-
-  // Colunas acrescentadas depois da primeira versão do schema, de forma
-  // idempotente para não quebrar bancos criados antes delas existirem:
-  // - aceita_em: a história zero grava o horário do aceite (CA-02);
-  // - doador: o doador vê a situação das próprias doações;
-  // - cancelada_em: o doador cancela uma doação ainda disponível.
-  const colunas = conexao().prepare('PRAGMA table_info(doacoes)').all();
-  for (const nova of ['aceita_em', 'doador', 'cancelada_em']) {
-    if (!colunas.some((c) => c.name === nova)) {
-      conexao().exec(`ALTER TABLE doacoes ADD COLUMN ${nova} TEXT`);
-    }
-  }
 }
 
 /**
@@ -86,15 +69,19 @@ export async function migrar() {
  * qualquer um que não seja o de teste, mesmo se chamada fora do Vitest.
  */
 export async function limparBanco() {
-  const arquivo = bancoEmUso();
-  if (arquivo !== BANCO_DE_TESTE) {
+  const banco = await bancoEmUso();
+  if (banco !== BANCO_DE_TESTE) {
     throw new Error(
-      `limparBanco recusado: o banco em uso (${arquivo}) não é o banco de teste`
+      `limparBanco recusado: o banco em uso (${banco}) não é o banco de teste`
     );
   }
-  conexao().exec('DELETE FROM doacoes');
+  await query('DELETE FROM doacoes');
 }
 
 export async function encerrar() {
-  if (db) { db.close(); db = undefined; arquivoEmUso = undefined; }
+  if (pool) {
+    const aberto = pool;
+    pool = undefined;
+    await aberto.end();
+  }
 }
