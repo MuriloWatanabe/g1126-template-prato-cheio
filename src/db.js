@@ -58,22 +58,25 @@ export async function migrar() {
       doador        TEXT,
       criada_em     TIMESTAMPTZ NOT NULL DEFAULT now(),
       aceita_em     TIMESTAMPTZ,
-      cancelada_em  TIMESTAMPTZ
+      cancelada_em  TIMESTAMPTZ,
+      coletada_em   TIMESTAMPTZ
     )
   `);
 
   // Colunas acrescentadas depois da primeira versão do schema, de forma
-  // idempotente para não quebrar bancos criados antes delas existirem:
+  // idempotente para não quebrar bancos criados antes delas existirem
+  // (`ADD COLUMN IF NOT EXISTS` é do PostgreSQL; o antigo PRAGMA era do SQLite):
   // - aceita_em: a história zero grava o horário do aceite (CA-02);
   // - doador: o doador vê a situação das próprias doações;
   // - cancelada_em: o doador cancela uma doação ainda disponível;
   // - coletada_em: o voluntário confirma a coleta (CA-17).
-  const colunas = conexao().prepare('PRAGMA table_info(doacoes)').all();
-  for (const nova of ['aceita_em', 'doador', 'cancelada_em', 'coletada_em']) {
-    if (!colunas.some((c) => c.name === nova)) {
-      conexao().exec(`ALTER TABLE doacoes ADD COLUMN ${nova} TEXT`);
-    }
-  }
+  await query(`
+    ALTER TABLE doacoes
+      ADD COLUMN IF NOT EXISTS aceita_em    TIMESTAMPTZ,
+      ADD COLUMN IF NOT EXISTS doador       TEXT,
+      ADD COLUMN IF NOT EXISTS cancelada_em TIMESTAMPTZ,
+      ADD COLUMN IF NOT EXISTS coletada_em  TIMESTAMPTZ
+  `);
 }
 
 /**
