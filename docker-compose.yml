@@ -1,0 +1,24 @@
+# PostgreSQL local do Prato Cheio (ADR 0001): a mesma imagem do CI.
+#   docker compose up -d     sobe o banco
+#   docker compose down -v   apaga o banco e os dados
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: pratocheio
+      POSTGRES_PASSWORD: pratocheio
+      POSTGRES_DB: pratocheio
+    ports:
+      - "5432:5432"
+    volumes:
+      - dados:/var/lib/postgresql/data
+      # Cria o banco exclusivo dos testes na primeira subida (ADR 0002).
+      - ./docker/criar-banco-de-teste.sql:/docker-entrypoint-initdb.d/criar-banco-de-teste.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pratocheio"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  dados:

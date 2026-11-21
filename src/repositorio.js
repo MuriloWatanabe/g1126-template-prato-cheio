@@ -1,15 +1,14 @@
-// Camada de dados do Prato Cheio — acesso ao banco.
-// TODO (grupo): implementar as quatro funções abaixo usando query().
-// A conexão e o schema já estão prontos em src/db.js.
+// Camada de dados do Prato Cheio — todo o SQL do sistema fica aqui (RNF-02).
+// A conexão e o schema estão em src/db.js.
 //
-// Marcador de parâmetro é `?` (SQL parametrizado evita injeção):
-//   const { rows } = await query('SELECT * FROM doacoes WHERE id = ?', [id]);
+// Marcadores de parâmetro do PostgreSQL: `$1`, `$2`… (SQL parametrizado evita injeção):
+//   const { rows } = await query('SELECT * FROM doacoes WHERE id = $1', [id]);
 import { query } from './db.js';
 
 export async function inserir({ tipo, quantidade, validade, doador = null }) {
   const sql = `
     INSERT INTO doacoes (tipo, quantidade, validade, doador)
-    VALUES (?, ?, ?, ?)
+    VALUES ($1, $2, $3, $4)
     RETURNING *
   `;
   const { rows } = await query(sql, [tipo, quantidade, validade, doador]);
@@ -17,13 +16,12 @@ export async function inserir({ tipo, quantidade, validade, doador = null }) {
 }
 
 export async function listarDisponiveis({ tipo } = {}) {
-  // Filtro opcional por tipo: trecho do nome, sem diferenciar maiúsculas.
-  // LOWER e LIKE existem igual no SQLite e no PostgreSQL (RNF-02).
+  // Filtro opcional por tipo: trecho do nome, sem diferenciar maiúsculas (ILIKE).
   const filtros = ["status = 'disponivel'"];
   const valores = [];
   if (tipo) {
-    filtros.push('LOWER(tipo) LIKE ?');
-    valores.push(`%${tipo.toLowerCase()}%`);
+    valores.push(`%${tipo}%`);
+    filtros.push(`tipo ILIKE $${valores.length}`);
   }
   const sql = `
     SELECT *
@@ -40,7 +38,7 @@ export async function listarDoDoador(doador) {
   const sql = `
     SELECT *
     FROM doacoes
-    WHERE doador = ?
+    WHERE doador = $1
     ORDER BY criada_em ASC, id ASC
   `;
   const { rows } = await query(sql, [doador]);
@@ -48,7 +46,7 @@ export async function listarDoDoador(doador) {
 }
 
 export async function buscarPorId(id) {
-  const sql = 'SELECT * FROM doacoes WHERE id = ?';
+  const sql = 'SELECT * FROM doacoes WHERE id = $1';
   const { rows } = await query(sql, [id]);
   return rows[0];
 }
@@ -58,17 +56,18 @@ export async function buscarPorId(id) {
  *
  * RN-02 (reserva exclusiva): a condição `status = 'disponivel'` está DENTRO do
  * UPDATE, não em um SELECT anterior. Um único comando testa e altera o estado,
- * então duas ONGs aceitando ao mesmo tempo não conseguem as duas — a segunda
- * não encontra linha para atualizar e recebe `undefined`.
+ * então duas ONGs aceitando ao mesmo tempo não conseguem as duas — no
+ * PostgreSQL a segunda espera a trava da linha, reavalia o WHERE, não encontra
+ * linha disponível e recebe `undefined`.
  * Ler antes e escrever depois abriria a janela entre as duas operações.
  */
 export async function aceitar(id, ong) {
   const sql = `
     UPDATE doacoes
        SET status    = 'aceita',
-           ong       = ?,
-           aceita_em = datetime('now')
-     WHERE id = ? AND status = 'disponivel'
+           ong       = $1,
+           aceita_em = now()
+     WHERE id = $2 AND status = 'disponivel'
     RETURNING *
   `;
   const { rows } = await query(sql, [ong, id]);
@@ -86,8 +85,8 @@ export async function cancelar(id, doador) {
   const sql = `
     UPDATE doacoes
        SET status       = 'cancelada',
-           cancelada_em = datetime('now')
-     WHERE id = ? AND doador = ? AND status = 'disponivel'
+           cancelada_em = now()
+     WHERE id = $1 AND doador = $2 AND status = 'disponivel'
     RETURNING *
   `;
   const { rows } = await query(sql, [id, doador]);

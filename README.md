@@ -77,24 +77,24 @@ qualquer alternativa com custo mensal de infraestrutura.
 
 ## Como rodar
 
-Requisito: **Node.js 22.13 ou superior**. Mais nada — o banco da Unidade 1 é SQLite, embutido no próprio Node.
+Requisitos: **Node.js 22.13 ou superior** e **Docker** (com Docker Compose). O banco é PostgreSQL 16 em contêiner ([ADR 0001](docs/adr/0001-migracao-sqlite-postgresql.md)).
 
 > Esta é a **stack preferencial** da disciplina. Se o seu grupo optar por outra, registre o ADR de justificativa e garanta os mesmos compromissos: repositório público com CI verde, rota de saúde, testes por um comando, os três comandos documentados aqui no README e banco relacional migrado para PostgreSQL na Unidade 3.
 
 ```bash
-npm install       # só na primeira vez
-npm run db:migrar # cria o schema (arquivo dados.sqlite)
-npm start         # sobe em http://localhost:3000
-npm test          # roda os testes
-npm run dev       # sobe recarregando a cada alteração
+npm install          # só na primeira vez
+docker compose up -d # sobe o PostgreSQL (bancos pratocheio e pratocheio_teste)
+npm run db:migrar    # cria o schema
+npm start            # sobe em http://localhost:3000
+npm test             # roda os testes
+npm run dev          # sobe recarregando a cada alteração
+docker compose down  # para o banco (com -v, apaga também os dados)
 ```
 
-Os testes usam SQLite **em memória**, então não sujam o banco de desenvolvimento.
+A aplicação usa o banco de `DATABASE_URL` (padrão: `postgres://pratocheio:pratocheio@localhost:5432/pratocheio`).
+Os testes usam **sempre** o banco `pratocheio_teste` e ignoram `DATABASE_URL`, então não sujam nem apagam o banco da aplicação ([ADR 0002](docs/adr/0002-testes-so-no-banco-de-teste.md)).
 
-> Ao rodar `npm test` o Node imprime `ExperimentalWarning: SQLite is an experimental feature`.
-> É esperado — o módulo embutido `node:sqlite` ainda é marcado como experimental. Não é erro e não reprova o CI.
-
-> **Atenção:** não deixe o repositório dentro de uma pasta sincronizada (OneDrive, Google Drive, Dropbox) nem em disco de rede. O SQLite precisa de trava de arquivo e nesses lugares falha com `disk I/O error`. Clone em uma pasta local comum, por exemplo `~/dev/`.
+> Sem Docker? Aponte `DATABASE_URL` para um PostgreSQL 16 instalado na máquina, com o usuário `pratocheio` (senha `pratocheio`) e os bancos `pratocheio` e `pratocheio_teste` criados.
 
 ## O banco: SQLite agora, PostgreSQL depois
 

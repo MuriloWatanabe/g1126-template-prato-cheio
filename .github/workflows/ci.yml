@@ -11,29 +11,26 @@ jobs:
   build-e-testes:
     runs-on: ubuntu-latest
 
-    # ---------------------------------------------------------------------
-    # UNIDADE 3 — quando migrarem para PostgreSQL, descomentem este bloco e
-    # a variável DATABASE_URL abaixo. Na Unidade 1 o banco é SQLite em
-    # memória, então o CI não precisa de serviço nenhum.
-    #
-    # services:
-    #   postgres:
-    #     image: postgres:16-alpine
-    #     env:
-    #       POSTGRES_USER: pratocheio
-    #       POSTGRES_PASSWORD: pratocheio
-    #       POSTGRES_DB: pratocheio
-    #     ports:
-    #       - 5432:5432
-    #     options: >-
-    #       --health-cmd="pg_isready -U pratocheio"
-    #       --health-interval=5s
-    #       --health-timeout=3s
-    #       --health-retries=10
-    #
-    # env:
-    #   DATABASE_URL: postgres://pratocheio:pratocheio@localhost:5432/pratocheio
-    # ---------------------------------------------------------------------
+    # PostgreSQL 16 em contêiner, a mesma imagem do docker-compose.yml (ADR 0001).
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: pratocheio
+          POSTGRES_PASSWORD: pratocheio
+          POSTGRES_DB: pratocheio
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U pratocheio"
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=10
+
+    # Banco da aplicação. Os testes ignoram esta variável e usam sempre
+    # pratocheio_teste (ADR 0002).
+    env:
+      DATABASE_URL: postgres://pratocheio:pratocheio@localhost:5432/pratocheio
 
     steps:
       - uses: actions/checkout@v4
@@ -45,6 +42,16 @@ jobs:
 
       - name: Instalar dependências
         run: npm ci
+
+      - name: Criar o banco de teste
+        run: docker exec ${{ job.services.postgres.id }} createdb -U pratocheio pratocheio_teste
+
+      - name: Verificar se o SQL está só na camada de dados (RNF-02)
+        run: |
+          if grep -rnE '\b(SELECT|INSERT|UPDATE|DELETE)\b' src/ | grep -v -e '^src/repositorio.js' -e '^src/db.js'; then
+            echo "SQL fora de src/repositorio.js e src/db.js"
+            exit 1
+          fi
 
       - name: Rodar os testes
         run: npm test
