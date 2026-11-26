@@ -117,3 +117,27 @@ export async function confirmarColeta(id, voluntario) {
   if (existente.status === 'cancelada') throw new Error('esta doação foi cancelada pelo doador');
   throw new Error('esta doação ainda não foi aceita por uma ONG');
 }
+
+// H3 — "a ONG devolve uma doação que aceitou e não vai conseguir buscar".
+// CA1: a doação aceita volta para a lista de disponíveis, sem ONG, e o motivo
+//      fica registrado (tabela `devolucoes`, que a Marta lê na H4).
+// CA2: doação já coletada (ou que não está aceita) é recusada com mensagem.
+// A ONG e o motivo são obrigatórios: sem eles a devolução não diz quem desistiu
+// nem por quê (decisões em docs/analise.md, seção 17).
+export async function devolver(id, ong, motivo) {
+  const identificador = validarId(id);
+  const nomeOng = typeof ong === 'string' ? ong.trim() : '';
+  if (!nomeOng) throw new Error('informe a ONG: identifique-se antes de devolver a doação');
+  const motivoInformado = typeof motivo === 'string' ? motivo.trim() : '';
+  if (!motivoInformado) throw new Error('informe o motivo da devolução');
+
+  const devolvida = await repo.devolver(identificador, nomeOng, motivoInformado);
+  if (devolvida) return devolvida;
+
+  // Não atualizou: descobre o motivo para dar a mensagem certa.
+  const existente = await repo.buscarPorId(identificador);
+  if (!existente) throw new Error('doação não encontrada');
+  if (existente.status === 'coletada') throw new Error('esta doação já foi coletada e não pode ser devolvida');
+  if (existente.status === 'cancelada') throw new Error('esta doação foi cancelada pelo doador');
+  throw new Error('esta doação não está aceita por nenhuma ONG');
+}

@@ -123,3 +123,31 @@ export async function coletar(id, voluntario) {
   const { rows } = await query(sql, [id, voluntario]);
   return rows[0];
 }
+
+/**
+ * Devolve à lista uma doação aceita, registra quem devolveu e por quê, e
+ * devolve a linha atualizada.
+ *
+ * Mesmo padrão do aceite: a condição `status = 'aceita'` fica DENTRO do UPDATE.
+ * O UPDATE e o registro da devolução são um único comando (CTE), então ou a
+ * doação volta e o motivo fica registrado, ou nada muda. A doação volta inteira,
+ * sem rastro da ONG: `ong` e `aceita_em` voltam a nulo.
+ */
+export async function devolver(id, ong, motivo) {
+  const sql = `
+    WITH devolvida AS (
+      UPDATE doacoes
+         SET status    = 'disponivel',
+             ong       = NULL,
+             aceita_em = NULL
+       WHERE id = $1 AND status = 'aceita'
+      RETURNING *
+    ), registro AS (
+      INSERT INTO devolucoes (doacao_id, ong, motivo)
+      SELECT id, $2, $3 FROM devolvida
+    )
+    SELECT * FROM devolvida
+  `;
+  const { rows } = await query(sql, [id, ong, motivo]);
+  return rows[0];
+}
