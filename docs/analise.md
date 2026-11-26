@@ -371,3 +371,22 @@ Nível *colaboradora*: a IA gerou candidatas, o grupo corrigiu e responde pelo r
 - **Dado pessoal: o que guardamos e quem vê.** Guardamos **só o nome digitado** (a tela pede apenas o nome, sem telefone nem documento). Ele é devolvido a quem confirmou a coleta e fica no banco; a consulta do doador **não o expõe** — o doador precisa saber que a doação chegou e quando, não quem foi buscar. Custo: não há como o doador identificar o voluntário pela tela. Se a ONG precisar disso, vira decisão futura (exige identificação real, hoje fora da fatia).
 
 **Rastreabilidade:** CA1, CA2, CA3 → `tests/coleta.test.js`, bloco "H2 — o voluntário confirma a coleta".
+## 17. Iteração 3 — H3: a ONG devolve uma doação aceita
+
+**Mudança de schema:** tabela nova `devolucoes` (`doacao_id`, `ong`, `motivo`, `devolvida_em`), criada de forma idempotente em `migrar()`. Nenhuma coluna nova em `doacoes`: na devolução, `ong` e `aceita_em` voltam a nulo.
+
+**Decisões do grupo**
+
+- **O motivo é obrigatório.** Sem motivo, a devolução é recusada e a doação continua aceita. O motivo é o único dado que explica por que doações voltam (falta de voluntário, carro quebrado), e é o que a Marta precisa ler na H4. Custo: um campo a mais para a ONG no momento em que já está desistindo.
+- **Onde o motivo fica: num registro de devoluções, não na doação.** Uma linha por devolução, com a ONG, o motivo e o horário. A doação volta inteira, sem rastro da ONG anterior (CA1); como ela pode ser devolvida mais de uma vez, colunas na própria doação apagariam a devolução anterior. A doação e o registro mudam no mesmo comando SQL: ou as duas coisas acontecem, ou nenhuma. Se uma doação for apagada direto no banco, o registro dela vai junto (`ON DELETE CASCADE`). A aplicação nunca apaga doações (cancelar é mudança de status), e assim a limpeza dos testes continua funcionando também nas branches de antes da H3.
+- **Quem vê o motivo: por enquanto, ninguém pela tela.** Ele fica no banco para a Marta, na H4. O doador vê a doação de volta como "disponível", sem a ONG e sem o motivo: o motivo fala da operação da ONG, não da doação. Custo: até a H4, o registro só é lido por SQL.
+- **A ONG que devolveu pode aceitar a mesma doação de novo.** O caso mais comum ("sem voluntário hoje") pode se resolver horas depois. Sem login, bloquear pelo nome seria contornado digitando outro nome. Custo: uma ONG pode aceitar e devolver em ciclo; o registro de devoluções deixa isso visível para a Marta.
+- **A ONG se identifica pelo nome digitado**, guardado no navegador, como o voluntário. O "Aceitar" deixa de mandar sempre `Minha ONG`: sem o nome real de quem aceitou, não haveria como conferir quem pode devolver (CA3). A limitação está em "Limitações do produto" no README.
+
+**Fatias**
+
+1. **Devolver com motivo (CA1 e CA2).** A recusa de doação coletada já vem com a condição `status = 'aceita'` dentro do `UPDATE`. Entra como a terceira cópia do roteiro de aceitar e confirmar a coleta.
+2. **Refatoração 2**, em PR à parte: extrai esse roteiro (`docs/refatoracoes.md`).
+3. **Só a ONG que aceitou devolve (CA3)**, já com a função extraída. Até essa fatia entrar, qualquer ONG que digite um nome consegue devolver.
+
+**Rastreabilidade:** CA1, CA2 → `tests/devolucao.test.js`, bloco "H3 — a ONG devolve uma doação aceita"; CA3 → fatia 3.

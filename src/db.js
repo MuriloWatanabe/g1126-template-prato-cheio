@@ -83,6 +83,22 @@ export async function migrar() {
       ADD COLUMN IF NOT EXISTS coletada_em  TIMESTAMPTZ,
       ADD COLUMN IF NOT EXISTS voluntario   TEXT
   `);
+
+  // H3: cada devolução de uma doação aceita fica registrada aqui — quem
+  // devolveu, por quê e quando. A doação em si volta sem rastro da ONG; o
+  // histórico é deste registro, para a Marta (H4). Uma linha por devolução.
+  // ON DELETE CASCADE: a aplicação nunca apaga doações (cancelar é status), e
+  // assim o `DELETE FROM doacoes` da limpeza dos testes continua valendo —
+  // também nas branches de antes da H3, que não conhecem esta tabela.
+  await query(`
+    CREATE TABLE IF NOT EXISTS devolucoes (
+      id            SERIAL PRIMARY KEY,
+      doacao_id     INTEGER NOT NULL REFERENCES doacoes(id) ON DELETE CASCADE,
+      ong           TEXT NOT NULL,
+      motivo        TEXT NOT NULL,
+      devolvida_em  TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `);
 }
 
 /**

@@ -52,6 +52,8 @@
   <ul id="minhas"></ul>
 
   <h2>Doações disponíveis</h2>
+  <label for="ong">Nome da ONG</label>
+  <input id="ong" placeholder="Ex.: Casa Esperança" autocomplete="organization">
   <label for="filtro-tipo">Filtrar por tipo</label>
   <input id="filtro-tipo" placeholder="Ex.: pão">
   <ul id="lista"></ul>
@@ -59,6 +61,8 @@
   <h2>Coletas pendentes</h2>
   <label for="voluntario">Nome do voluntário (só o nome, sem telefone nem documento)</label>
   <input id="voluntario" placeholder="Ex.: Rui" autocomplete="given-name">
+  <label for="motivo-devolucao">Motivo, se a ONG for devolver a doação</label>
+  <input id="motivo-devolucao" placeholder="Ex.: sem voluntário hoje">
   <ul id="coletas"></ul>
 
   <script>
@@ -90,6 +94,26 @@
       try { localStorage.setItem(CHAVE_VOLUNTARIO, nome); } catch { /* vale só até recarregar */ }
     }
 
+    // A ONG também só digita o nome; fica guardado neste navegador. É ele que
+    // aceita e, depois, devolve a doação (H3).
+    const CHAVE_ONG = 'pratocheio.ong';
+
+    function lerOngGuardada() {
+      try { return localStorage.getItem(CHAVE_ONG) ?? ''; } catch { return ''; }
+    }
+
+    function guardarOng(nome) {
+      try { localStorage.setItem(CHAVE_ONG, nome); } catch { /* vale só até recarregar */ }
+    }
+
+    // Lê o nome digitado da ONG; sem ele, avisa e devolve vazio.
+    function ongInformada() {
+      const nome = document.getElementById('ong').value.trim();
+      if (!nome) mostrarMensagem('Informe o nome da ONG.', 'erro');
+      else guardarOng(nome);
+      return nome;
+    }
+
     function aplicarDoador(nome) {
       doadorAtual = nome;
       document.getElementById('entrar').hidden = Boolean(nome);
@@ -118,10 +142,12 @@
         const botao = document.createElement('button');
         botao.textContent = 'Aceitar';
         botao.onclick = async () => {
+          const ong = ongInformada();
+          if (!ong) return;
           const res = await fetch(`/api/doacoes/${d.id}/aceitar`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ong: 'Minha ONG' })
+            body: JSON.stringify({ ong })
           });
           const resultado = await res.json();
           if (res.ok) {
@@ -167,8 +193,35 @@
           carregar();
         };
         li.appendChild(botao);
+        li.appendChild(botaoDevolver(d));
         coletas.appendChild(li);
       }
+    }
+
+    // H3: a ONG que aceitou e não vai conseguir buscar devolve a doação, com o
+    // motivo; ela volta para "Doações disponíveis", sem a ONG.
+    function botaoDevolver(doacao) {
+      const botao = document.createElement('button');
+      botao.textContent = 'Devolver';
+      botao.onclick = async () => {
+        const ong = ongInformada();
+        if (!ong) return;
+        const campoMotivo = document.getElementById('motivo-devolucao');
+        const res = await fetch(`/api/doacoes/${doacao.id}/devolver`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ong, motivo: campoMotivo.value.trim() })
+        });
+        const resultado = await res.json();
+        if (res.ok) {
+          campoMotivo.value = '';
+          mostrarMensagem('Doação devolvida: ela voltou para a lista de disponíveis.', 'sucesso');
+        } else {
+          mostrarMensagem(resultado.erro, 'erro');
+        }
+        carregar();
+      };
+      return botao;
     }
 
     const SITUACAO = { disponivel: 'disponível', aceita: 'aceita', cancelada: 'cancelada' };
@@ -259,6 +312,7 @@
     };
 
     document.getElementById('voluntario').value = lerVoluntarioGuardado();
+    document.getElementById('ong').value = lerOngGuardada();
     aplicarDoador(lerDoadorGuardado());
     carregar();
   </script>

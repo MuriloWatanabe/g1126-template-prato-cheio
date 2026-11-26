@@ -38,6 +38,7 @@ Divergências entre o diagrama de dados e o `src/db.js`:
 | 1 | ONG e doador são tabelas (`ONGS`, `DOADORES`), ligadas à doação por FK | `ong` e `doador` são colunas `TEXT` com o nome digitado | Decisão 4: sem cadastro nem login nesta unidade. Custo: "Padaria X" e "padaria x" viram dois doadores |
 | 2 | Voluntário e coleta: tabela `VOLUNTARIOS`, `id_voluntario`, `coletada_em` e os status `coletada` e `perdida` | `coletada_em` e `coletada` existem (CA-17); `VOLUNTARIOS`, `id_voluntario` e `perdida` não | A coleta não identifica o voluntário (decisão 4: sem cadastro nem login) e a expiração (RN-03, decisão 2) ainda não foi feita |
 | 3 | Tipos e restrições: `quantidade` numérica > 0 com `unidade`, `validade` como data, `status` com `CHECK` e horários em UTC | `quantidade` e `validade` são `TEXT` livre ("10 kg"), `status` sem `CHECK`, horários por `datetime('now')`, sem fuso | Ficam para a migração do [ADR 0001](adr/0001-migracao-sqlite-postgresql.md) (`timestamptz`) e para o RNF-03 |
+| 4 | Não há registro de devoluções | Tabela `devolucoes` (doação, ONG, motivo, horário), criada na H3 | O diagrama é anterior à H3; atualizar junto com a H4, que lê esse registro |
 
 ## ADRs
 Ver `docs/adr/`.

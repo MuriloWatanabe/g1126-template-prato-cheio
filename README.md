@@ -171,6 +171,7 @@ por um teste de verdade conforme implementa.
 - **O nome é comparado exatamente (após remover espaços nas pontas).** "Padaria Pão Bom" e "padaria pão bom" são doadores diferentes, e um erro de digitação "perde" as doações de vista.
 - **Trocar de navegador ou de aparelho exige digitar o nome de novo**, e em aba privada o nome some ao fechar.
 - **O voluntário também só digita o nome**, sem verificação: qualquer pessoa pode confirmar uma coleta como "Rui". O nome fica guardado na doação, mas não aparece na consulta do doador.
+- **A ONG também só digita o nome** para aceitar e devolver uma doação: quem digitar "Casa Esperança" age como a Casa Esperança. O nome fica guardado no navegador.
 - **Doações publicadas antes da H1 não têm doador** e não aparecem na consulta de ninguém (continuam disponíveis para as ONGs). Decisão em `docs/analise.md`, seção 15.
 
 ## Uso de IA
