@@ -115,8 +115,8 @@ export async function coletar(id) {
   const sql = `
     UPDATE doacoes
        SET status      = 'coletada',
-           coletada_em = datetime('now')
-     WHERE id = ? AND status = 'aceita'
+           coletada_em = now()
+     WHERE id = $1 AND status = 'aceita'
     RETURNING *
   `;
   const { rows } = await query(sql, [id]);
