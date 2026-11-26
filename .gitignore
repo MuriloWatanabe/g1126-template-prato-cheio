@@ -9,3 +9,5 @@ dados.sqlite-journal
 
 # artefatos temporários do vitest
 *.timestamp-*
+
+.idea

@@ -394,8 +394,8 @@ describe('voluntário confirma a coleta', () => {
     return aceita;
   }
 
-  function confirmarColeta(id) {
-    return request(app).post(`/api/doacoes/${id}/coletar`);
+  function confirmarColeta(id, voluntario = 'Rui') {
+    return request(app).post(`/api/doacoes/${id}/coletar`).send({ voluntario });
   }
 
   // CA-17 — Dado uma doação aceita por uma ONG

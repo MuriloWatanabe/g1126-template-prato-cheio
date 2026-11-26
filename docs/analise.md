@@ -359,3 +359,15 @@ Nível *colaboradora*: a IA gerou candidatas, o grupo corrigiu e responde pelo r
 **Decisão — identificação do doador:** pelo nome digitado, guardado no navegador (`localStorage`). É a escolha mais simples que torna o CA válido; a limitação está em "Limitações do produto" no README.
 
 **Rastreabilidade:** CA1 → `tests/doacoes.test.js` ("CA1…"); CA2 → ("CA2…"); CA3 → ("CA3…", três variações: ausente, vazio, só espaços).
+
+## 16. Iteração 2 — H2: o voluntário confirma a coleta
+
+**Mudança de schema:** coluna `voluntario TEXT` (nullable) em `doacoes`, criada de forma idempotente em `migrar()`. Nula nas doações ainda não coletadas e nas coletadas antes da H2.
+
+**Decisões do grupo**
+
+- **Confirmar duas vezes a mesma coleta: recusa, não ignora em silêncio.** A segunda tentativa recebe "a coleta desta doação já foi confirmada" e a primeira confirmação (voluntário e horário) permanece. Ignorar em silêncio esconderia um segundo voluntário que foi buscar uma doação já coletada. Teste: "recusa a segunda confirmação…".
+- **O nome do voluntário é obrigatório.** Sem ele a coleta não diz quem a fez, e o objetivo de impacto (tempo entre "disponível" e "coletada") perde a rastreabilidade. Sem nome, a confirmação é recusada e a doação não muda.
+- **Dado pessoal: o que guardamos e quem vê.** Guardamos **só o nome digitado** (a tela pede apenas o nome, sem telefone nem documento). Ele é devolvido a quem confirmou a coleta e fica no banco; a consulta do doador **não o expõe** — o doador precisa saber que a doação chegou e quando, não quem foi buscar. Custo: não há como o doador identificar o voluntário pela tela. Se a ONG precisar disso, vira decisão futura (exige identificação real, hoje fora da fatia).
+
+**Rastreabilidade:** CA1, CA2, CA3 → `tests/coleta.test.js`, bloco "H2 — o voluntário confirma a coleta".
