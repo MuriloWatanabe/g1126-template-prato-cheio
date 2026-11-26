@@ -67,7 +67,9 @@ export async function migrar() {
   // idempotente para não quebrar bancos criados antes delas existirem
   // (`ADD COLUMN IF NOT EXISTS` é do PostgreSQL; o antigo PRAGMA era do SQLite):
   // - aceita_em: a história zero grava o horário do aceite (CA-02);
-  // - doador: o doador vê a situação das próprias doações;
+  // - doador: o doador vê a situação das próprias doações (H1). Continua sem
+  //   NOT NULL porque as doações anteriores à H1 não têm doador; a obrigatoriedade
+  //   para as novas é regra de negócio (src/doacoes.js), não do schema;
   // - cancelada_em: o doador cancela uma doação ainda disponível;
   // - coletada_em: o voluntário confirma a coleta (CA-17).
   await query(`

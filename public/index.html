@@ -13,6 +13,7 @@
     button { margin-top: .8rem; cursor: pointer; }
     li { border: 1px solid #ddd; border-radius: .5rem; padding: .6rem; margin-bottom: .5rem; list-style: none; }
     ul { padding: 0; }
+    [hidden] { display: none !important; }
     #mensagem { padding: .6rem; border-radius: .5rem; margin-bottom: 1rem; display: none; }
     #mensagem.sucesso { display: block; background: #e6f4ea; color: #1e7e34; border: 1px solid #b7dfc0; }
     #mensagem.erro { display: block; background: #fdecea; color: #b3261e; border: 1px solid #f5c2c0; }
@@ -21,10 +22,23 @@
 <body>
   <h1>Prato Cheio</h1>
 
+  <p id="mensagem"></p>
+
+  <fieldset id="identificacao">
+    <legend>Quem é você? (doador)</legend>
+    <div id="entrar">
+      <label for="doador">Nome do doador</label>
+      <input id="doador" placeholder="Ex.: Padaria Pão Bom" autocomplete="organization">
+      <button id="entrar-botao">Entrar</button>
+    </div>
+    <div id="logado" hidden>
+      <p>Você está como <strong id="nome-doador"></strong>.</p>
+      <button id="sair">Trocar de doador</button>
+    </div>
+  </fieldset>
+
   <fieldset>
     <legend>Publicar doação</legend>
-    <label for="doador">Seu nome (doador)</label>
-    <input id="doador" placeholder="Ex.: Padaria Central">
     <label for="tipo">Tipo de alimento</label>
     <input id="tipo" placeholder="Ex.: sopa, pão, frutas">
     <label for="quantidade">Quantidade</label>
@@ -35,19 +49,42 @@
   </fieldset>
 
   <h2>Minhas doações</h2>
-  <p>Informe seu nome no formulário acima para acompanhar suas doações.</p>
   <ul id="minhas"></ul>
 
   <h2>Doações disponíveis</h2>
   <label for="filtro-tipo">Filtrar por tipo</label>
   <input id="filtro-tipo" placeholder="Ex.: pão">
-  <p id="mensagem"></p>
   <ul id="lista"></ul>
 
   <h2>Coletas pendentes</h2>
   <ul id="coletas"></ul>
 
   <script>
+    // "Login" sem senha (limitação conhecida): o doador digita o nome e o
+    // navegador o guarda. O armazenamento pode falhar (aba privada), então tudo
+    // passa por try/catch e a página segue funcionando sem ele.
+    const CHAVE_DOADOR = 'pratocheio.doador';
+    let doadorAtual = '';
+
+    function lerDoadorGuardado() {
+      try { return localStorage.getItem(CHAVE_DOADOR) ?? ''; } catch { return ''; }
+    }
+
+    function guardarDoador(nome) {
+      try {
+        if (nome) localStorage.setItem(CHAVE_DOADOR, nome);
+        else localStorage.removeItem(CHAVE_DOADOR);
+      } catch { /* sem armazenamento: vale só até recarregar a página */ }
+    }
+
+    function aplicarDoador(nome) {
+      doadorAtual = nome;
+      document.getElementById('entrar').hidden = Boolean(nome);
+      document.getElementById('logado').hidden = !nome;
+      document.getElementById('nome-doador').textContent = nome;
+      carregarMinhas();
+    }
+
     function mostrarMensagem(texto, tipo) {
       const mensagem = document.getElementById('mensagem');
       mensagem.textContent = texto;
@@ -117,23 +154,28 @@
 
     const SITUACAO = { disponivel: 'disponível', aceita: 'aceita', cancelada: 'cancelada' };
 
+    // Monta a lista inteira e a troca de uma vez: duas cargas simultâneas
+    // (ao abrir a página) não podem acrescentar os itens duas vezes.
     async function carregarMinhas() {
-      const doador = document.getElementById('doador').value.trim();
       const minhas = document.getElementById('minhas');
-      minhas.innerHTML = '';
-      if (!doador) return;
+      const mensagemVazia = (texto) => {
+        const li = document.createElement('li');
+        li.textContent = texto;
+        minhas.replaceChildren(li);
+      };
+      if (!doadorAtual) return mensagemVazia('Identifique-se acima para ver as suas doações.');
+
+      const doador = doadorAtual;
       const res = await fetch(`/api/doadores/${encodeURIComponent(doador)}/doacoes`);
       const doacoes = await res.json();
-      if (!doacoes.length) {
-        minhas.innerHTML = '<li>Você ainda não publicou doações.</li>';
-        return;
-      }
-      for (const d of doacoes) {
+      if (!doacoes.length) return mensagemVazia('Você ainda não publicou doações.');
+
+      const itens = doacoes.map((d) => {
         const li = document.createElement('li');
         const situacao = d.status === 'coletada'
           ? `coletada em ${d.coletada_em}, aceita`
           : SITUACAO[d.status] ?? d.status;
-        li.textContent = `${d.tipo} — ${d.quantidade}: ${situacao}`
+        li.textContent = `${d.tipo} — ${d.quantidade} (até ${d.validade}): ${situacao}`
           + (d.ong ? ` por ${d.ong} em ${d.aceita_em}` : '') + ' ';
         if (d.status === 'disponivel') {
           const botao = document.createElement('button');
@@ -150,27 +192,54 @@
           };
           li.appendChild(botao);
         }
-        minhas.appendChild(li);
-      }
+        return li;
+      });
+      minhas.replaceChildren(...itens);
     }
 
     document.getElementById('filtro-tipo').oninput = carregar;
-    document.getElementById('doador').onchange = carregarMinhas;
+
+    document.getElementById('entrar-botao').onclick = () => {
+      const nome = document.getElementById('doador').value.trim();
+      if (!nome) {
+        mostrarMensagem('Informe o nome do doador para entrar.', 'erro');
+        return;
+      }
+      guardarDoador(nome);
+      mostrarMensagem(`Você entrou como ${nome}.`, 'sucesso');
+      aplicarDoador(nome);
+    };
+
+    document.getElementById('sair').onclick = () => {
+      guardarDoador('');
+      document.getElementById('doador').value = '';
+      aplicarDoador('');
+    };
 
     document.getElementById('publicar').onclick = async () => {
-      await fetch('/api/doacoes', {
+      const res = await fetch('/api/doacoes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tipo: document.getElementById('tipo').value,
           quantidade: document.getElementById('quantidade').value,
           validade: document.getElementById('validade').value,
-          doador: document.getElementById('doador').value
+          doador: doadorAtual
         })
       });
+      const resultado = await res.json();
+      if (res.ok) {
+        mostrarMensagem('Doação publicada.', 'sucesso');
+        for (const campo of ['tipo', 'quantidade', 'validade']) {
+          document.getElementById(campo).value = '';
+        }
+      } else {
+        mostrarMensagem(resultado.erro, 'erro');
+      }
       carregar();
     };
 
+    aplicarDoador(lerDoadorGuardado());
     carregar();
   </script>
 </body>

@@ -4,14 +4,18 @@ import * as repo from './repositorio.js';
 
 // História zero — "um doador publica uma doação".
 // Critério: tipo, quantidade e validade são obrigatórios.
-// O nome do doador é opcional (não há login, ver "Fora da fatia" na Análise);
-// quando informado, permite ao doador acompanhar as próprias doações.
+// H1 (CA3): o doador também é obrigatório — sem ele a doação não poderia ser
+// acompanhada por ninguém. Não há login: o doador se identifica pelo nome
+// (ver "Limitações do produto" no README).
 export async function criarDoacao({ tipo, quantidade, validade, doador }) {
   const t = typeof tipo === 'string' ? tipo.trim() : '';
   const q = typeof quantidade === 'string' ? quantidade.trim() : '';
   const v = typeof validade === 'string' ? validade.trim() : '';
-  const d = typeof doador === 'string' && doador.trim() ? doador.trim() : null;
+  const d = typeof doador === 'string' ? doador.trim() : '';
 
+  if (!d) {
+    throw new Error('informe o doador: identifique-se antes de publicar uma doação');
+  }
   if (!t || !q || !v) {
     throw new Error('tipo, quantidade e validade são obrigatórios');
   }
@@ -27,8 +31,10 @@ export async function listarDisponiveis({ tipo } = {}) {
   return await repo.listarDisponiveis({ tipo: t || undefined });
 }
 
-// História — "o doador vê a situação das próprias doações"
-// (disponível ou aceita, e por qual ONG).
+// H1 — "o doador acompanha as suas doações": só as dele, em qualquer situação
+// (disponível, aceita — e por qual ONG —, cancelada ou coletada).
+// Doações antigas, publicadas quando o doador era opcional, não têm doador e
+// por isso não aparecem para ninguém (decisão registrada em docs/analise.md).
 export async function listarDoDoador(doador) {
   const d = typeof doador === 'string' ? doador.trim() : '';
   if (!d) throw new Error('informe o doador');
