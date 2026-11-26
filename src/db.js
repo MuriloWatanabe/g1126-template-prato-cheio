@@ -59,7 +59,8 @@ export async function migrar() {
       criada_em     TIMESTAMPTZ NOT NULL DEFAULT now(),
       aceita_em     TIMESTAMPTZ,
       cancelada_em  TIMESTAMPTZ,
-      coletada_em   TIMESTAMPTZ
+      coletada_em   TIMESTAMPTZ,
+      voluntario    TEXT
     )
   `);
 
@@ -67,15 +68,20 @@ export async function migrar() {
   // idempotente para não quebrar bancos criados antes delas existirem
   // (`ADD COLUMN IF NOT EXISTS` é do PostgreSQL; o antigo PRAGMA era do SQLite):
   // - aceita_em: a história zero grava o horário do aceite (CA-02);
-  // - doador: o doador vê a situação das próprias doações;
+  // - doador: o doador vê a situação das próprias doações (H1). Continua sem
+  //   NOT NULL porque as doações anteriores à H1 não têm doador; a obrigatoriedade
+  //   para as novas é regra de negócio (src/doacoes.js), não do schema;
   // - cancelada_em: o doador cancela uma doação ainda disponível;
-  // - coletada_em: o voluntário confirma a coleta (CA-17).
+  // - coletada_em: o voluntário confirma a coleta (CA-17);
+  // - voluntario: quem confirmou a coleta (H2). Só o nome digitado, nada mais;
+  //   nulo nas doações ainda não coletadas e nas coletadas antes da H2.
   await query(`
     ALTER TABLE doacoes
       ADD COLUMN IF NOT EXISTS aceita_em    TIMESTAMPTZ,
       ADD COLUMN IF NOT EXISTS doador       TEXT,
       ADD COLUMN IF NOT EXISTS cancelada_em TIMESTAMPTZ,
-      ADD COLUMN IF NOT EXISTS coletada_em  TIMESTAMPTZ
+      ADD COLUMN IF NOT EXISTS coletada_em  TIMESTAMPTZ,
+      ADD COLUMN IF NOT EXISTS voluntario   TEXT
   `);
 }
 

@@ -4,14 +4,18 @@ import * as repo from './repositorio.js';
 
 // História zero — "um doador publica uma doação".
 // Critério: tipo, quantidade e validade são obrigatórios.
-// O nome do doador é opcional (não há login, ver "Fora da fatia" na Análise);
-// quando informado, permite ao doador acompanhar as próprias doações.
+// H1 (CA3): o doador também é obrigatório — sem ele a doação não poderia ser
+// acompanhada por ninguém. Não há login: o doador se identifica pelo nome
+// (ver "Limitações do produto" no README).
 export async function criarDoacao({ tipo, quantidade, validade, doador }) {
   const t = typeof tipo === 'string' ? tipo.trim() : '';
   const q = typeof quantidade === 'string' ? quantidade.trim() : '';
   const v = typeof validade === 'string' ? validade.trim() : '';
-  const d = typeof doador === 'string' && doador.trim() ? doador.trim() : null;
+  const d = typeof doador === 'string' ? doador.trim() : '';
 
+  if (!d) {
+    throw new Error('informe o doador: identifique-se antes de publicar uma doação');
+  }
   if (!t || !q || !v) {
     throw new Error('tipo, quantidade e validade são obrigatórios');
   }
@@ -27,8 +31,10 @@ export async function listarDisponiveis({ tipo } = {}) {
   return await repo.listarDisponiveis({ tipo: t || undefined });
 }
 
-// História — "o doador vê a situação das próprias doações"
-// (disponível ou aceita, e por qual ONG).
+// H1 — "o doador acompanha as suas doações": só as dele, em qualquer situação
+// (disponível, aceita — e por qual ONG —, cancelada ou coletada).
+// Doações antigas, publicadas quando o doador era opcional, não têm doador e
+// por isso não aparecem para ninguém (decisão registrada em docs/analise.md).
 export async function listarDoDoador(doador) {
   const d = typeof doador === 'string' ? doador.trim() : '';
   if (!d) throw new Error('informe o doador');
@@ -88,12 +94,20 @@ export async function listarColetasPendentes() {
   return await repo.listarColetasPendentes();
 }
 
-// Fatia 1 (CA-17): só doação aceita pode ser coletada, e o horário gravado é o
-// do servidor. O horário do toque e o reenvio ficam para as próximas fatias.
-export async function confirmarColeta(id) {
+// H2 — "o voluntário confirma a coleta".
+// CA1: só doação aceita pode ser coletada; grava o nome do voluntário e o horário
+//      do servidor. O horário do toque e o reenvio ficam para as próximas fatias.
+// CA2: doação que não está aceita (disponível, cancelada ou já coletada) é
+//      recusada com mensagem e não muda.
+// O nome do voluntário é obrigatório: sem ele a coleta não diz quem a fez. É o
+// único dado pessoal guardado (só o nome digitado; sem telefone nem documento)
+// e não é exposto na consulta do doador (ver docs/analise.md, seção 16).
+export async function confirmarColeta(id, voluntario) {
   const identificador = validarId(id);
+  const nome = typeof voluntario === 'string' ? voluntario.trim() : '';
+  if (!nome) throw new Error('informe o voluntário: identifique-se antes de confirmar a coleta');
 
-  const coletada = await repo.coletar(identificador);
+  const coletada = await repo.coletar(identificador, nome);
   if (coletada) return coletada;
 
   // Não atualizou: descobre o motivo para dar a mensagem certa.

@@ -59,7 +59,7 @@ export function criarApp() {
 
   app.post('/api/doacoes/:id/coletar', async (req, res) => {
     try {
-      res.json(await doacoes.confirmarColeta(req.params.id));
+      res.json(await doacoes.confirmarColeta(req.params.id, req.body?.voluntario));
     } catch (erro) {
       res.status(400).json({ erro: erro.message });
     }

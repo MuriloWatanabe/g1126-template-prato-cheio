@@ -111,14 +111,15 @@ export async function listarColetasPendentes() {
  * Mesmo padrão do aceite: a condição `status = 'aceita'` fica DENTRO do UPDATE,
  * então confirmações simultâneas não registram a coleta duas vezes.
  */
-export async function coletar(id) {
+export async function coletar(id, voluntario) {
   const sql = `
     UPDATE doacoes
        SET status      = 'coletada',
-           coletada_em = now()
+           coletada_em = now(),
+           voluntario  = $2
      WHERE id = $1 AND status = 'aceita'
     RETURNING *
   `;
-  const { rows } = await query(sql, [id]);
+  const { rows } = await query(sql, [id, voluntario]);
   return rows[0];
 }

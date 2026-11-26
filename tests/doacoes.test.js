@@ -28,10 +28,12 @@ describe('a aplicação sobe', () => {
 // Critérios de aceite da história zero (docs/analise.md) virados teste.
 // ---------------------------------------------------------------------------
 
+// Desde a H1 todo doador se identifica ao publicar (CA3).
 const doacaoValida = {
   tipo: 'Pão francês',
   quantidade: '5 kg',
-  validade: '2026-12-31'
+  validade: '2026-12-31',
+  doador: 'Padaria Central'
 };
 
 async function publicar(dados = doacaoValida) {
@@ -57,9 +59,9 @@ describe('publicar e listar doações', () => {
   //         Quando a ONG abre a lista
   //         Então as três aparecem da mais antiga para a mais recente
   it('lista as doações da mais antiga para a mais recente', async () => {
-    const primeira = await publicar({ tipo: 'Sopa', quantidade: '3 kg', validade: '2026-12-01' });
-    const segunda = await publicar({ tipo: 'Arroz', quantidade: '10 kg', validade: '2026-12-02' });
-    const terceira = await publicar({ tipo: 'Feijão', quantidade: '8 kg', validade: '2026-12-03' });
+    const primeira = await publicar({ tipo: 'Sopa', quantidade: '3 kg', validade: '2026-12-01', doador: 'Padaria Central' });
+    const segunda = await publicar({ tipo: 'Arroz', quantidade: '10 kg', validade: '2026-12-02', doador: 'Padaria Central' });
+    const terceira = await publicar({ tipo: 'Feijão', quantidade: '8 kg', validade: '2026-12-03', doador: 'Padaria Central' });
 
     const res = await request(app).get('/api/doacoes');
     expect(res.body.map((d) => d.id)).toEqual([
@@ -73,7 +75,7 @@ describe('publicar e listar doações', () => {
   //                 Quando o doador confirma a publicação
   //                 Então a publicação é recusada e nada entra na lista
   it('recusa doação sem os campos obrigatórios', async () => {
-    const res = await publicar({ tipo: 'Sopa', quantidade: '', validade: '2026-12-31' });
+    const res = await publicar({ tipo: 'Sopa', quantidade: '', validade: '2026-12-31', doador: 'Padaria Central' });
     expect(res.status).toBe(400);
     expect(res.body.erro).toMatch(/obrigatórios/);
 
@@ -148,9 +150,9 @@ describe('filtrar disponíveis por tipo', () => {
   // Quando a ONG filtra por "pão"
   // Então vê só as de pão, com a validade, da mais antiga para a mais recente
   it('mostra só as doações do tipo filtrado, com validade', async () => {
-    const pao = await publicar({ tipo: 'Pão francês', quantidade: '5 kg', validade: '2026-12-01' });
-    await publicar({ tipo: 'Arroz', quantidade: '10 kg', validade: '2026-12-02' });
-    const forma = await publicar({ tipo: 'pão de forma', quantidade: '3 pacotes', validade: '2026-12-03' });
+    const pao = await publicar({ tipo: 'Pão francês', quantidade: '5 kg', validade: '2026-12-01', doador: 'Padaria Central' });
+    await publicar({ tipo: 'Arroz', quantidade: '10 kg', validade: '2026-12-02', doador: 'Padaria Central' });
+    const forma = await publicar({ tipo: 'pão de forma', quantidade: '3 pacotes', validade: '2026-12-03', doador: 'Padaria Central' });
 
     const res = await request(app).get('/api/doacoes').query({ tipo: 'pão' });
     expect(res.status).toBe(200);
@@ -224,6 +226,80 @@ describe('doador acompanha as próprias doações', () => {
     const res = await request(app).get('/api/doadores/Ninguem/doacoes');
     expect(res.status).toBe(200);
     expect(res.body).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// H1 — "o doador acompanha as suas doações" (critérios CA1 a CA3 da iteração 1).
+// ---------------------------------------------------------------------------
+
+describe('H1 — o doador acompanha as suas doações', () => {
+  const padaria = 'Padaria Pão Bom';
+
+  function consultar(doador) {
+    return request(app).get(`/api/doadores/${encodeURIComponent(doador)}/doacoes`);
+  }
+
+  // CA1 — Dado que a "Padaria Pão Bom" publicou duas doações e a "Casa Esperança"
+  //       aceitou uma delas
+  //       Quando a padaria consulta as suas doações
+  //       Então vê as duas: uma disponível e outra aceita pela Casa Esperança
+  it('CA1: mostra as duas doações, uma disponível e outra aceita pela Casa Esperança', async () => {
+    const { body: pao } = await publicar({ ...doacaoValida, doador: padaria });
+    const { body: bolo } = await publicar({
+      tipo: 'Bolo', quantidade: '2 unidades', validade: '2026-12-02', doador: padaria
+    });
+    await request(app).post(`/api/doacoes/${bolo.id}/aceitar`).send({ ong: 'Casa Esperança' });
+
+    const res = await consultar(padaria);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(2);
+    expect(res.body[0]).toMatchObject({ id: pao.id, status: 'disponivel', ong: null });
+    expect(res.body[1]).toMatchObject({ id: bolo.id, status: 'aceita', ong: 'Casa Esperança' });
+  });
+
+  // CA2 — Dado que outro doador publicou uma doação
+  //       Quando a "Padaria Pão Bom" consulta as suas
+  //       Então essa doação não aparece
+  it('CA2: não mostra a doação publicada por outro doador', async () => {
+    await publicar({ ...doacaoValida, doador: padaria });
+    const { body: dele } = await publicar({ ...doacaoValida, doador: 'Mercado Bom Preço' });
+
+    const res = await consultar(padaria);
+
+    expect(res.body).toHaveLength(1);
+    expect(res.body.map((d) => d.id)).not.toContain(dele.id);
+  });
+
+  // CA3 — Dado que o doador não é informado na publicação
+  //       Quando a doação é enviada
+  //       Então ela é recusada com uma mensagem clara e nada é gravado
+  it.each([
+    ['ausente', undefined],
+    ['vazio', ''],
+    ['só espaços', '   ']
+  ])('CA3: recusa a publicação com doador %s e não grava nada', async (_caso, doador) => {
+    const res = await publicar({ tipo: 'Pão', quantidade: '5 kg', validade: '2026-12-31', doador });
+
+    expect(res.status).toBe(400);
+    expect(res.body.erro).toMatch(/informe o doador/);
+
+    const disponiveis = await request(app).get('/api/doacoes');
+    expect(disponiveis.body).toHaveLength(0);
+  });
+
+  // Decisão do grupo: as doações antigas (sem doador) não pertencem a ninguém,
+  // então não aparecem na consulta de nenhum doador — mas seguem disponíveis às ONGs.
+  it('doação antiga, sem doador, fica fora de qualquer consulta e continua disponível às ONGs', async () => {
+    const { query } = await import('../src/db.js');
+    await query(
+      "INSERT INTO doacoes (tipo, quantidade, validade) VALUES ('Arroz', '10 kg', '2026-12-31')"
+    );
+
+    expect((await consultar(padaria)).body).toEqual([]);
+    expect((await consultar('null')).body).toEqual([]);
+    expect((await request(app).get('/api/doacoes')).body).toHaveLength(1);
   });
 });
 
@@ -318,8 +394,8 @@ describe('voluntário confirma a coleta', () => {
     return aceita;
   }
 
-  function confirmarColeta(id) {
-    return request(app).post(`/api/doacoes/${id}/coletar`);
+  function confirmarColeta(id, voluntario = 'Rui') {
+    return request(app).post(`/api/doacoes/${id}/coletar`).send({ voluntario });
   }
 
   // CA-17 — Dado uma doação aceita por uma ONG

@@ -165,6 +165,14 @@ Falta (Trabalho 1 — walking skeleton): implementar `src/doacoes.js` (regras) e
 Os critérios de aceite estão em `tests/doacoes.test.js` como `it.todo`: troque cada um
 por um teste de verdade conforme implementa.
 
+## Limitações do produto
+
+- **O doador não tem login nem senha.** Ele se identifica digitando o nome, que fica guardado no navegador (`localStorage`). Quem souber (ou chutar) o nome de um doador vê as doações dele e pode cancelar as que ainda estão disponíveis. Revisitar quando houver login real.
+- **O nome é comparado exatamente (após remover espaços nas pontas).** "Padaria Pão Bom" e "padaria pão bom" são doadores diferentes, e um erro de digitação "perde" as doações de vista.
+- **Trocar de navegador ou de aparelho exige digitar o nome de novo**, e em aba privada o nome some ao fechar.
+- **O voluntário também só digita o nome**, sem verificação: qualquer pessoa pode confirmar uma coleta como "Rui". O nome fica guardado na doação, mas não aparece na consulta do doador.
+- **Doações publicadas antes da H1 não têm doador** e não aparecem na consulta de ninguém (continuam disponíveis para as ONGs). Decisão em `docs/analise.md`, seção 15.
+
 ## Uso de IA
 
 A IA pode participar da produção, mas o grupo é responsável por verificar, testar,
